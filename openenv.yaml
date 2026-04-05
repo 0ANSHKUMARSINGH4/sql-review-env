@@ -1,0 +1,58 @@
+spec_version: "1.0"
+
+name: sql-review-env
+description: "An RL environment where an AI agent reviews SQL queries for vulnerabilities and performance issues."
+version: "1.0.0"
+
+entry_point: main.py
+
+tasks:
+  - id: easy-sql-review
+    description: "Review simple SQL queries for basic syntax errors and minor issues."
+    difficulty: easy
+
+  - id: medium-sql-review
+    description: "Review moderately complex SQL queries for logical bugs, inefficiencies, and potential vulnerabilities."
+    difficulty: medium
+
+  - id: hard-sql-review
+    description: "Review complex SQL queries for advanced vulnerabilities (e.g., SQL injection), performance bottlenecks, and optimization opportunities."
+    difficulty: hard
+
+environment:
+  observation_space:
+    type: object
+    required: [query, feedback_history, issues_remaining]
+    properties:
+      query:
+        type: string
+      feedback_history:
+        type: array
+        items:
+          type: string
+      issues_remaining:
+        type: integer
+
+  action_space:
+    type: object
+    required: [review_comment]
+    properties:
+      review_comment:
+        type: string
+
+  reward_space:
+    type: object
+    required: [value]
+    properties:
+      value:
+        type: number
+
+metadata:
+  author: "Ansh Kumar Singh"
+  license: "MIT"
+  tags:
+    - reinforcement-learning
+    - sql
+    - code-review
+    - security
+    - performance

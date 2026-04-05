@@ -1,0 +1,20 @@
+[project]
+name = "sql-review-env"
+version = "1.0.0"
+description = "An RL environment where an AI agent reviews SQL queries for vulnerabilities and performance issues."
+authors = [
+    { name = "Ansh Kumar Singh" }
+]
+requires-python = ">=3.10"
+
+dependencies = [
+    "numpy",
+    "openenv>=0.1.13"
+]
+
+[project.scripts]
+server = "server.app:main"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
