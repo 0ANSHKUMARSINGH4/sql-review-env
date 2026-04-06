@@ -1,20 +1,19 @@
 import os
-import asyncio
-import httpx
-from openai import AsyncOpenAI
+import requests
+from openai import OpenAI
 
 # =========================
-# Env Variables
+# Env Variables (with defaults)
 # =========================
-API_BASE_URL = os.getenv("API_BASE_URL")
+API_BASE_URL = os.getenv("API_BASE_URL", "https://api-inference.huggingface.co/v1")
 HF_TOKEN = os.getenv("HF_TOKEN")
-MODEL_NAME = os.getenv("MODEL_NAME")
-ENV_BASE_URL = os.getenv("ENV_BASE_URL")
+MODEL_NAME = os.getenv("MODEL_NAME", "mistralai/Mistral-7B-Instruct-v0.3")
+ENV_BASE_URL = os.getenv("ENV_BASE_URL", "https://rnr046-sql-review-env.hf.space")
 
 # =========================
-# OpenAI Client
+# OpenAI Client (SYNC)
 # =========================
-client = AsyncOpenAI(
+client = OpenAI(
     base_url=API_BASE_URL,
     api_key=HF_TOKEN
 )
@@ -32,9 +31,9 @@ def log_end(success, steps, score, rewards):
     print(f"[END] success={success} steps={steps} score={score} rewards={rewards}", flush=True)
 
 # =========================
-# LLM Call
+# LLM Call (SYNC)
 # =========================
-async def generate_review(query, history):
+def generate_review(query, history):
     prompt = f"""
 You are an expert SQL reviewer.
 
@@ -54,7 +53,7 @@ Previous feedback:
 
 Give only a short review comment.
 """
-    response = await client.chat.completions.create(
+    response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=[
             {"role": "system", "content": "You are a SQL expert."},
@@ -67,17 +66,18 @@ Give only a short review comment.
 # =========================
 # Run Single Task
 # =========================
-async def run_task(task_name: str, env_client: httpx.AsyncClient):
+def run_task(task_name):
     max_steps = 10
-    max_total_reward = 3.0
     rewards = []
+    max_total_reward = 3.0
 
     task_slug = task_name.split("-")[0]  # "easy", "medium", "hard"
 
     log_start(task_name, ENV_BASE_URL, MODEL_NAME)
 
     try:
-        res = await env_client.post("/reset", params={"task": task_slug})
+        # RESET with task parameter
+        res = requests.post(f"{ENV_BASE_URL}/reset", params={"task": task_slug})
         state = res.json()
 
         for step in range(1, max_steps + 1):
@@ -85,10 +85,10 @@ async def run_task(task_name: str, env_client: httpx.AsyncClient):
                 query = state["query"]
                 history = state["feedback_history"]
 
-                review_comment = await generate_review(query, history)
+                review_comment = generate_review(query, history)
                 action = {"review_comment": review_comment}
 
-                res = await env_client.post("/step", json=action)
+                res = requests.post(f"{ENV_BASE_URL}/step", json=action)
                 data = res.json()
 
                 reward = data["reward"]["value"]
@@ -119,19 +119,17 @@ async def run_task(task_name: str, env_client: httpx.AsyncClient):
 # =========================
 # Main Runner
 # =========================
-async def run():
+def run():
     tasks = [
         "easy-sql-review",
         "medium-sql-review",
         "hard-sql-review"
     ]
-
-    async with httpx.AsyncClient(base_url=ENV_BASE_URL, timeout=60.0) as env_client:
-        for task in tasks:
-            await run_task(task, env_client)
+    for task in tasks:
+        run_task(task)
 
 # =========================
 # Entry
 # =========================
 if __name__ == "__main__":
-    asyncio.run(run())
+    run()

@@ -4,3 +4,4 @@ pydantic
 openenv-core
 httpx
 openai
+requests
