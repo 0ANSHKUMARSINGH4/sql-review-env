@@ -25,14 +25,11 @@ client = AsyncOpenAI(
 def log_start(task, env, model):
     print(f"[START] task={task} env={env} model={model}", flush=True)
 
-
 def log_step(step, action, reward, done, error):
     print(f"[STEP] step={step} action={action} reward={reward} done={done} error={error}", flush=True)
 
-
 def log_end(success, steps, score, rewards):
     print(f"[END] success={success} steps={steps} score={score} rewards={rewards}", flush=True)
-
 
 # =========================
 # LLM Call
@@ -47,7 +44,7 @@ Analyze the following SQL query and identify issues like:
 - Missing indexes
 - Inefficient joins
 
-Be concise.
+Be concise. Mention the exact issue name clearly.
 
 Query:
 {query}
@@ -57,7 +54,6 @@ Previous feedback:
 
 Give only a short review comment.
 """
-
     response = await client.chat.completions.create(
         model=MODEL_NAME,
         messages=[
@@ -66,82 +62,73 @@ Give only a short review comment.
         ],
         temperature=0.2
     )
-
     return response.choices[0].message.content.strip()
 
-
 # =========================
-# Main Loop
+# Run Single Task
 # =========================
-async def run():
-    task_name = "easy-sql-review"
+async def run_task(task_name: str, env_client: httpx.AsyncClient):
     max_steps = 10
+    max_total_reward = 3.0
     rewards = []
-    max_total_reward = 3.0  # theoretical max
 
-    async with httpx.AsyncClient(base_url=ENV_BASE_URL) as env_client:
+    task_slug = task_name.split("-")[0]  # "easy", "medium", "hard"
 
-        # START LOG
-        log_start(task_name, ENV_BASE_URL, MODEL_NAME)
+    log_start(task_name, ENV_BASE_URL, MODEL_NAME)
 
-        try:
-            # -------------------------
-            # RESET
-            # -------------------------
-            res = await env_client.post("/reset")
-            state = res.json()
+    try:
+        res = await env_client.post("/reset", params={"task": task_slug})
+        state = res.json()
 
-            # -------------------------
-            # LOOP
-            # -------------------------
-            for step in range(1, max_steps + 1):
-                try:
-                    query = state["query"]
-                    history = state["feedback_history"]
+        for step in range(1, max_steps + 1):
+            try:
+                query = state["query"]
+                history = state["feedback_history"]
 
-                    # Generate action
-                    review_comment = await generate_review(query, history)
+                review_comment = await generate_review(query, history)
+                action = {"review_comment": review_comment}
 
-                    action = {"review_comment": review_comment}
+                res = await env_client.post("/step", json=action)
+                data = res.json()
 
-                    # Step call
-                    res = await env_client.post("/step", json=action)
-                    data = res.json()
+                reward = data["reward"]["value"]
+                done = data["done"]
+                rewards.append(reward)
 
-                    reward = data["reward"]["value"]
-                    done = data["done"]
+                log_step(step, action, reward, done, None)
 
-                    rewards.append(reward)
+                state = data["observation"]
 
-                    # LOG STEP
-                    log_step(step, action, reward, done, None)
-
-                    state = data["observation"]
-
-                    if done:
-                        break
-
-                except Exception as e:
-                    log_step(step, None, 0.0, True, str(e))
+                if done:
                     break
 
-            # -------------------------
-            # FINAL METRICS
-            # -------------------------
-            total_reward = sum(rewards)
-            score = total_reward / max_total_reward
+            except Exception as e:
+                log_step(step, None, 0.0, True, str(e))
+                break
 
-            # clamp
-            score = max(0.0, min(1.0, score))
+        score = sum(rewards) / max_total_reward
+        score = max(0.0, min(1.0, score))
+        success = score >= 0.7
 
-            success = score >= 0.7
+        log_end(success, len(rewards), score, rewards)
 
-            log_end(success, len(rewards), score, rewards)
+    except Exception as e:
+        log_end(False, 0, 0.0, [])
+        print(f"[FATAL] task={task_name} error={str(e)}", flush=True)
 
-        except Exception as e:
-            log_end(False, 0, 0.0, [])
-            print({"fatal_error": str(e)})
+# =========================
+# Main Runner
+# =========================
+async def run():
+    tasks = [
+        "easy-sql-review",
+        "medium-sql-review",
+        "hard-sql-review"
+    ]
 
+    async with httpx.AsyncClient(base_url=ENV_BASE_URL, timeout=60.0) as env_client:
+        for task in tasks:
+            await run_task(task, env_client)
 
 # =========================
 # Entry

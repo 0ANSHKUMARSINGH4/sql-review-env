@@ -168,8 +168,19 @@ env = SQLReviewEnv()
 # =========================
 
 @app.post("/reset")
-def reset():
-    return env.reset()
+def reset(task: str = "easy"):
+    if task == "easy":
+        env.current_index = 0
+    elif task == "medium":
+        env.current_index = 1
+    elif task == "hard":
+        env.current_index = 2
+
+    env.feedback_history = []
+    env.found_issues = set()
+    env.steps = 0
+
+    return env.state()
 
 
 @app.post("/step")
