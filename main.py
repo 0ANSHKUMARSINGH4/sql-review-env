@@ -58,9 +58,6 @@ class SQLReviewEnv:
         self.max_steps = 10
         self.steps = 0
 
-    # -------------------------
-    # Reset
-    # -------------------------
     def reset(self):
         self.current_index = 0
         self.feedback_history = []
@@ -68,22 +65,15 @@ class SQLReviewEnv:
         self.steps = 0
         return self.state()
 
-    # -------------------------
-    # State
-    # -------------------------
     def state(self):
         current = self.queries[self.current_index]
         remaining = len(current["issues"]) - len(self.found_issues)
-
         return Observation(
             query=current["query"],
             feedback_history=self.feedback_history,
             issues_remaining=remaining
         )
 
-    # -------------------------
-    # Step
-    # -------------------------
     def step(self, action: Action):
         self.steps += 1
         comment = action.review_comment.lower()
@@ -93,37 +83,34 @@ class SQLReviewEnv:
         true_issues = set(current["issues"])
 
         detected = set()
-
-        # Match issues
         for issue in true_issues:
             if self._match_issue(issue, comment):
                 detected.add(issue)
 
-        # -------------------------
-        # Reward Logic (SMART)
-        # -------------------------
-
         correct = detected - self.found_issues
         false_positive = detected - true_issues
-        missed = true_issues - detected
+        missed = true_issues - detected - self.found_issues
 
         reward = 0.0
 
         # Reward correct findings
-        reward += len(correct) * 1.0
+        reward += len(correct) * 0.8
 
         # Penalize hallucinations
-        reward -= len(false_positive) * 0.5
+        reward -= len(false_positive) * 0.4
 
-        # Small penalty for missing obvious issues
-        reward -= len(missed) * 0.2
+        # Small penalty for missing issues
+        reward -= len(missed) * 0.15
 
         # Bonus for finishing all
         if correct and len(self.found_issues | correct) == len(true_issues):
-            reward += 1.0
+            reward += 0.5
 
         # Update found issues
         self.found_issues.update(correct)
+
+        # Clamp strictly between 0.01 and 0.99 (never 0.0 or 1.0)
+        reward = round(max(0.01, min(0.99, reward)), 2)
 
         done = (
             len(self.found_issues) == len(true_issues)
@@ -132,7 +119,7 @@ class SQLReviewEnv:
 
         return {
             "observation": self.state(),
-            "reward": Reward(value=round(reward, 2)),
+            "reward": Reward(value=reward),
             "done": done,
             "debug": {
                 "correct": list(correct),
@@ -141,17 +128,13 @@ class SQLReviewEnv:
             }
         }
 
-    # -------------------------
-    # Matching Logic
-    # -------------------------
     def _match_issue(self, issue, comment):
         patterns = {
             "sql injection": r"(sql injection|unsanitized|user input|concatenation|injection)",
-            "n+1 query": r"(n\+1|multiple queries|loop query)",
-            "missing index": r"(missing index|no index|index)",
-            "inefficient join": r"(inefficient join|wrong join|nested loop)"
+            "n+1 query": r"(n\+1|multiple queries|loop query|n plus 1)",
+            "missing index": r"(missing index|no index|index hint|add index)",
+            "inefficient join": r"(inefficient join|wrong join|nested loop|join type|cross join)"
         }
-
         pattern = patterns.get(issue, issue)
         return re.search(pattern, comment) is not None
 
