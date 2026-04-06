@@ -107,7 +107,7 @@ def run_task(task_name):
                 break
 
         score = sum(rewards) / max_total_reward
-        score = max(0.0, min(1.0, score))
+        score = max(0.01, min(0.99, score))
         success = score >= 0.7
 
         log_end(success, len(rewards), score, rewards)
