@@ -122,7 +122,7 @@ def run_task(task_id: str, client: OpenAI):
             if done:
                 break
 
-        # Calculate final score (normalized)
+        # Calculate final score (normalized strictly between 0 and 1)
         total_reward = sum(rewards)
         # Dynamic max based on task
         if "easy" in task_id or "medium" in task_id:
@@ -132,9 +132,11 @@ def run_task(task_id: str, client: OpenAI):
         elif "performance" in task_id:
             max_possible = 1.0
         else:
-            max_possible = 0.5 # Default security-extreme has 1 issue
+            max_possible = 0.5 
             
-        score = min(total_reward / max_possible, 1.0) if max_possible > 0 else 0.0
+        unclamped_score = (total_reward / max_possible) if max_possible > 0 else 0.0
+        # Phase 2 requirement: score must be strictly between 0 and 1
+        score = max(0.01, min(0.99, unclamped_score))
         success = score >= SUCCESS_THRESHOLD
         
     except Exception as e:
