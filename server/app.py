@@ -55,7 +55,7 @@ def dashboard():
     return HTMLResponse(content=html_content)
 
 @app.post("/reset", response_model=SQLReviewObservation)
-def reset(task: str = "easy-sql-review"):
+def reset(task: str = "easy-sql-review", payload: Dict[str, Any] = Body(None)):
     """Reset the environment to a specific task."""
     try:
         obs = env.reset(task=task)

@@ -1,3 +1,14 @@
+---
+title: SQL Review Environment
+emoji: 🔍
+colorFrom: blue
+colorTo: gray
+sdk: docker
+app_port: 7860
+tags:
+  - openenv
+---
+
 # SQL Review Environment (OpenEnv)
 
 **Author:** Ansh Kumar Singh
