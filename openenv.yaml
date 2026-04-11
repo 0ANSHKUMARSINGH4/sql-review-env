@@ -1,58 +1,67 @@
 spec_version: "1.0"
-
-name: sql-review-env
-description: "An RL environment where an AI agent reviews SQL queries for vulnerabilities and performance issues."
+name: "sql-review-env"
+description: "An RL environment where an AI agent reviews SQL queries for security vulnerabilities and performance bottlenecks."
 version: "1.0.0"
 
-entry_point: main.py
+entry_point: "server.app:app"
 
 tasks:
-  - id: easy-sql-review
-    description: "Review simple SQL queries for basic syntax errors and minor issues."
-    difficulty: easy
-
-  - id: medium-sql-review
-    description: "Review moderately complex SQL queries for logical bugs, inefficiencies, and potential vulnerabilities."
-    difficulty: medium
-
-  - id: hard-sql-review
-    description: "Review complex SQL queries for advanced vulnerabilities (e.g., SQL injection), performance bottlenecks, and optimization opportunities."
-    difficulty: hard
+  - id: "easy-sql-review"
+    description: "Review a simple SQL query for basic security and syntax errors."
+    difficulty: "easy"
+  - id: "medium-sql-review"
+    description: "Review moderately complex SQL queries for logical bugs and N+1 query patterns."
+    difficulty: "medium"
+  - id: "hard-sql-review"
+    description: "Review complex SQL queries for advanced vulnerabilities (SQL injection), performance issues, and optimization."
+    difficulty: "hard"
+  - id: "security-extreme"
+    description: "Review deeply nested dynamic SQL for complex injection patterns."
+    difficulty: "hard"
+  - id: "performance-optimization"
+    description: "Review inefficient subquery patterns and missing indexes."
+    difficulty: "medium"
 
 environment:
   observation_space:
-    type: object
-    required: [query, feedback_history, issues_remaining]
+    type: "object"
+    required: ["query", "schema_context", "issues_remaining", "done"]
     properties:
       query:
-        type: string
+        type: "string"
+        description: "The SQL query being reviewed."
+      schema_context:
+        type: "string"
+        description: "Contextual database schema information."
       feedback_history:
-        type: array
+        type: "array"
         items:
-          type: string
+          type: "string"
       issues_remaining:
-        type: integer
+        type: "integer"
+      done:
+        type: "boolean"
 
   action_space:
-    type: object
-    required: [review_comment]
+    type: "object"
+    required: ["review_comment"]
     properties:
       review_comment:
-        type: string
+        type: "string"
 
   reward_space:
-    type: object
-    required: [value]
+    type: "object"
+    required: ["value"]
     properties:
       value:
-        type: number
+        type: "number"
 
 metadata:
   author: "Ansh Kumar Singh"
   license: "MIT"
   tags:
-    - reinforcement-learning
-    - sql
-    - code-review
-    - security
-    - performance
+    - "openenv"
+    - "sql"
+    - "security"
+    - "performance"
+    - "code-review"

@@ -26,5 +26,8 @@ COPY . .
 # Expose port (Hugging Face Spaces default)
 EXPOSE 7860
 
+# Metadata for HF Space
+LABEL openenv=true
+
 # Run the FastAPI app
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "7860"]

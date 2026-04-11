@@ -1,135 +1,160 @@
 import os
-import requests
+import textwrap
+from typing import List, Optional
 from openai import OpenAI
+import requests
 
 # =========================
-# Env Variables (with defaults)
+# Mandatory Env Variables
 # =========================
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api-inference.huggingface.co/v1")
-HF_TOKEN = os.getenv("HF_TOKEN")
 MODEL_NAME = os.getenv("MODEL_NAME", "mistralai/Mistral-7B-Instruct-v0.3")
-ENV_BASE_URL = os.getenv("ENV_BASE_URL", "https://rnr046-sql-review-env.hf.space")
+HF_TOKEN = os.getenv("HF_TOKEN")
+ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://0.0.0.0:7860")  # Local default for testing
 
 # =========================
-# OpenAI Client (SYNC)
+# Configuration
 # =========================
-client = OpenAI(
-    base_url=API_BASE_URL,
-    api_key=HF_TOKEN
-)
+MAX_STEPS = 10
+TEMPERATURE = 0.2
+MAX_TOKENS = 150
+SUCCESS_THRESHOLD = 0.7
+
+SYSTEM_PROMPT = textwrap.dedent(
+    """
+    You are an expert SQL reviewer. Your task is to analyze the provided SQL query and identify security vulnerabilities (like SQL Injection) or performance issues (like N+1 queries, missing indexes).
+    
+    Format your response as a concise review comment. Mention the issue name clearly if you find one.
+    """
+).strip()
 
 # =========================
-# Logging Functions (STRICT FORMAT)
+# Logging Functions (STRICT)
 # =========================
-def log_start(task, env, model):
+def log_start(task: str, env: str, model: str) -> None:
     print(f"[START] task={task} env={env} model={model}", flush=True)
 
-def log_step(step, action, reward, done, error):
-    print(f"[STEP] step={step} action={action} reward={reward} done={done} error={error}", flush=True)
-
-def log_end(success, steps, score, rewards):
-    print(f"[END] success={success} steps={steps} score={score} rewards={rewards}", flush=True)
-
-# =========================
-# LLM Call (SYNC)
-# =========================
-def generate_review(query, history):
-    prompt = f"""
-You are an expert SQL reviewer.
-
-Analyze the following SQL query and identify issues like:
-- SQL Injection
-- N+1 queries
-- Missing indexes
-- Inefficient joins
-
-Be concise. Mention the exact issue name clearly.
-
-Query:
-{query}
-
-Previous feedback:
-{history}
-
-Give only a short review comment.
-"""
-    response = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=[
-            {"role": "system", "content": "You are a SQL expert."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.2
+def log_step(step: int, action: str, reward: float, done: bool, error: Optional[str]) -> None:
+    error_val = error if error else "null"
+    done_val = str(done).lower()
+    print(
+        f"[STEP] step={step} action={action} reward={reward:.2f} done={done_val} error={error_val}",
+        flush=True,
     )
-    return response.choices[0].message.content.strip()
+
+def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
+    rewards_str = ",".join(f"{r:.2f}" for r in rewards)
+    print(f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}", flush=True)
 
 # =========================
-# Run Single Task
+# Core Logic
 # =========================
-def run_task(task_name):
-    max_steps = 10
+def get_model_review(client: OpenAI, query: str, schema: str, history: List[str]) -> str:
+    history_block = "\n".join(history[-3:]) if history else "None"
+    user_prompt = textwrap.dedent(
+        f"""
+        SQL Query: {query}
+        Table Schema: {schema}
+        
+        Previous Feedback:
+        {history_block}
+        
+        Provide your concise review comment:
+        """
+    ).strip()
+    
+    # Retry logic for robustness during evaluation
+    for attempt in range(3):
+        try:
+            completion = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=TEMPERATURE,
+                max_tokens=MAX_TOKENS,
+            )
+            return (completion.choices[0].message.content or "").strip()
+        except Exception as exc:
+            if attempt == 2:
+                return f"Error calling model after multiple attempts: {exc}"
+            continue
+    return "Error: Unexpected flow in model calling."
+
+def run_task(task_id: str, client: OpenAI):
     rewards = []
-    max_total_reward = 3.0
-
-    task_slug = task_name.split("-")[0]  # "easy", "medium", "hard"
-
-    log_start(task_name, ENV_BASE_URL, MODEL_NAME)
-
+    steps_taken = 0
+    success = False
+    history = []
+    
+    log_start(task=task_id, env="sql-review-env", model=MODEL_NAME)
+    
     try:
-        # RESET with task parameter
-        res = requests.post(f"{ENV_BASE_URL}/reset", params={"task": task_slug})
-        state = res.json()
-
-        for step in range(1, max_steps + 1):
-            try:
-                query = state["query"]
-                history = state["feedback_history"]
-
-                review_comment = generate_review(query, history)
-                action = {"review_comment": review_comment}
-
-                res = requests.post(f"{ENV_BASE_URL}/step", json=action)
-                data = res.json()
-
-                reward = data["reward"]["value"]
-                done = data["done"]
-                rewards.append(reward)
-
-                log_step(step, action, reward, done, None)
-
-                state = data["observation"]
-
-                if done:
-                    break
-
-            except Exception as e:
-                log_step(step, None, 0.0, True, str(e))
+        # Reset relative to the environment URL
+        res = requests.post(f"{ENV_BASE_URL}/reset", params={"task": task_id})
+        obs = res.json()
+        
+        for step in range(1, MAX_STEPS + 1):
+            if obs.get("done", False):
+                break
+                
+            query = obs["query"]
+            schema = obs.get("schema_context", "N/A")
+            
+            review_comment = get_model_review(client, query, schema, history)
+            action = {"review_comment": review_comment}
+            
+            # Step
+            step_res = requests.post(f"{ENV_BASE_URL}/step", json=action)
+            data = step_res.json()
+            
+            obs = data["observation"]
+            reward = data["reward"]["value"]
+            done = data["done"]
+            
+            rewards.append(reward)
+            steps_taken = step
+            log_step(step, review_comment.replace("\n", " "), reward, done, None)
+            
+            history.append(f"Step {step}: {review_comment}")
+            
+            if done:
                 break
 
-        score = sum(rewards) / max_total_reward
-        score = max(0.01, min(0.99, score))
-        success = score >= 0.7
-
-        log_end(success, len(rewards), score, rewards)
-
+        # Calculate final score (normalized)
+        total_reward = sum(rewards)
+        # Dynamic max based on task
+        if "easy" in task_id or "medium" in task_id:
+            max_possible = 0.5
+        elif "hard" in task_id:
+            max_possible = 1.5
+        elif "performance" in task_id:
+            max_possible = 1.0
+        else:
+            max_possible = 0.5 # Default security-extreme has 1 issue
+            
+        score = min(total_reward / max_possible, 1.0) if max_possible > 0 else 0.0
+        success = score >= SUCCESS_THRESHOLD
+        
     except Exception as e:
-        log_end(False, 0, 0.0, [])
-        print(f"[FATAL] task={task_name} error={str(e)}", flush=True)
+        log_end(False, steps_taken, 0.0, rewards)
+        print(f"[DEBUG] Fatal error in task {task_id}: {e}")
+        return
 
-# =========================
-# Main Runner
-# =========================
-def run():
+    log_end(success, steps_taken, score, rewards)
+
+def main():
+    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
     tasks = [
         "easy-sql-review",
         "medium-sql-review",
-        "hard-sql-review"
+        "hard-sql-review",
+        "security-extreme",
+        "performance-optimization"
     ]
-    for task in tasks:
-        run_task(task)
+    for task_id in tasks:
+        run_task(task_id, client)
 
-# =========================
-# Entry
-# =========================
 if __name__ == "__main__":
-    run()
+    main()
