@@ -1,5 +1,5 @@
 ---
-title: SQL Review Environment
+title: SQL Review Environment V2
 emoji: 🔍
 colorFrom: blue
 colorTo: gray
@@ -9,112 +9,88 @@ tags:
   - openenv
 ---
 
-# SQL Review Environment (OpenEnv)
+# SQL Review Environment V2 — Privacy-Preserving Enterprise AI SQL Review & Agent Evaluation
 
-**Author:** Ansh Kumar Singh
-**Status:** Round 1 - Meta PyTorch OpenEnv Hackathon
+**Author:** Ansh Kumar Singh  
+**Status:** Round 1 - Meta PyTorch OpenEnv Hackathon (Upgraded to V2 Enterprise Benchmark)
 
-`sql-review-env` is an RL environment designed to train and evaluate AI agents on the real-world task of **SQL Code Review**. It simulates the process of identifying security vulnerabilities (like SQL Injection) and performance bottlenecks (like N+1 queries) in database interactions.
-
-## Motivation
-In modern development, AI agents are increasingly used to automate code reviews. This environment provides a structured, reproducible way to measure an agent's ability to "think" about SQL safety and performance using the OpenEnv framework.
+`sql-review-env` V2 is an open, privacy-preserving, enterprise-oriented RL environment designed to train and evaluate AI agents on **SQL Code Review**, **Database Security**, and **Query Performance Optimization**.
 
 ---
 
-## Observation Space
+## Key Architecture & Data Flow
 
-The observation is a typed Pydantic model (`SQLReviewObservation`):
-
-- `query` *(string)*: The SQL query (or ORM pattern) to review.
-- `schema_context` *(string)*: Information about the relevant tables and indices.
-- `feedback_history` *(List[string])*: A list of reviews already provided in the current episode.
-- `issues_remaining` *(int)*: Count of unique issues still present in the query.
-- `done` *(boolean)*: Whether the review process for this query is complete.
-
-## Action Space
-
-The action is a typed Pydantic model (`SQLReviewAction`):
-
-- `review_comment` *(string)*: A natural language comment describing the identified issues.
-
-## Reward & Rubric System
-
-This environment follows **OpenEnv RFC 004** for reward calculation:
-- **Partial Progress**: Agents receive `+0.5` reward for each unique, valid issue identified via keyword matching.
-- **Episodic Done**: The episode ends when all issues are found or the step limit (10) is reached.
-- **Programmatic Grader**: A deterministic keyword-based mapping ensures scores are reproducible and fair.
-
----
-## Web Dashboard
-The environment now includes a real-time **Vulnerability Dashboard** at the root URL (`/`). This provides a visual overview of the current query, table schema, and identified issues, which is helpful for debugging and manual verification.
-
----
-## Benchmark Tasks
-
-| Task ID | Difficulty | Description | Issues to Find |
-|---------|------------|-------------|----------------|
-| `easy-sql-review` | Easy | Single Table SQL Injection | `sql_injection` |
-| `medium-sql-review` | Medium | ORM pattern causing N+1 | `n_plus_one` |
-| `hard-sql-review` | Hard | Multi-issue Join query | `sql_injection`, `missing_index`, `inefficient_join` |
-| `security-extreme` | Hard | Nested Dynamic SQL Injection | `sql_injection` |
-| `performance-review` | Medium | Redundant Subqueries & Stars | `unnecessary_columns`, `inefficient_join` |
+```text
+               Raw SQL / Schema
+                      │
+                      ▼
+               Privacy Gateway
+            (Redaction & Tokenization)
+                      │
+                      ▼
+            Prompt Isolation Boundary
+         (System vs Untrusted SQL framing)
+                      │
+                      ▼
+                Model Provider
+          (Mock / OpenAI-compatible)
+                      │
+                      ▼
+           Structured Findings (JSON)
+                      │
+                      ▼
+            Evidence-Based Evaluator
+      (Precision, Recall, F1, Location, Fix)
+                      │
+                      ▼
+              Reward + Metrics State
+```
 
 ---
-## Setup & Usage
+
+## V2 Highlights
+
+1. **Privacy Foundation (`privacy/`)**: Ephemeral tokenization (`<EMAIL_001>`, `<PASSWORD_001>`) redacting credentials, API keys, PII, and infrastructure tokens before LLM submission. Fail-closed `ENTERPRISE_PRIVACY_MODE=true` enforcement.
+2. **Prompt-Injection Isolation (`security/`)**: Structural delimiter framing ensuring untrusted SQL queries, comments, and schemas cannot override system instructions. Advisory injection scanner for prompt override signals.
+3. **Multi-Dialect AST SQL Analysis (`sql_analysis/`)**: Multi-dialect (`PostgreSQL`, `MySQL`, `SQLite`) AST parsing via `sqlglot` producing verified ground truth issues while distinguishing between *confirmed* facts and *candidate* inferences.
+4. **Evidence-Based Multi-Dimensional Grading (`grading/`)**: Five-dimensional evaluation scoring issue classification, line location, evidence quality, severity, and remediation recommendations with precision, recall, F1 metrics and strict false-positive penalties (-0.75).
+5. **Deterministic Dynamic Scenario Generation (`scenarios/`)**: Seed-reproducible dynamic scenario generation across dialects and difficulty levels (`easy`, `medium`, `hard`).
+6. **Restricted Ephemeral SQL Sandbox (`sandbox/`)**: Ephemeral in-memory SQLite (`:memory:`) analysis sandbox executing `EXPLAIN QUERY PLAN` with application-level security policies blocking `DROP`, `TRUNCATE`, `ALTER`, `ATTACH`, `DETACH`, `PRAGMA`, `INSERT`, `UPDATE`, `DELETE`, `REPLACE`, `load_extension`, and multi-statement SQL.
+7. **Enterprise Observability & Reporting (`reporting/`)**: Machine-readable `/metrics` and `/api/report` endpoints with zero secret/PII leakage guarantees.
+8. **No-LLM Deterministic Mode**: Offline benchmark evaluation mode using `NO_LLM_MODE=true` or `LLM_ENABLED=false`.
+
+---
+
+## OpenEnv API Endpoints
+
+- `POST /reset`: Reset environment to baseline task (`easy-sql-review`, `medium-sql-review`, `hard-sql-review`, `security-extreme`, `performance-optimization`) or dynamic scenario (`/reset?task=generated&seed=12345&dialect=postgres&difficulty=hard`).
+- `POST /step`: Progress environment using structured `SQLReviewAction` or legacy `review_comment`.
+- `GET /state`: Fetch current observation state.
+- `GET /metrics`: Aggregated OpenEnv observability metrics.
+- `GET /api/report`: Machine-readable `BenchmarkReport` JSON.
+- `GET /`: Real-time V2 Enterprise Observability Dashboard.
+
+---
+
+## Setup & Execution
 
 ### Local Development
 ```bash
 pip install -r requirements.txt
+python -m pytest tests/ -v
 uvicorn server.app:app --host 0.0.0.0 --port 7860
 ```
 
-### Baseline Inference
-The baseline `inference.py` has been upgraded with **retry logic** and **fuzzy matching support** to handle transient API errors.
+### Reproducible Baseline Benchmark
 ```bash
-export HF_TOKEN="your_key"
-export MODEL_NAME="mistralai/Mistral-7B-Instruct-v0.3"
+export MODEL_PROVIDER=mock
+export LLM_ENABLED=false
 python inference.py
 ```
 
-### Docker
-```bash
-docker build -t sql-review-env .
-docker run -p 7860:7860 sql-review-env
-```
-
-## Baseline Scores
-
-| Task | Score (0.0 - 1.0) |
-|------|-------|
-| Easy | 1.00  |
-| Medium | 1.00 |
-| Hard | 0.85  |
-
-*Scores obtained using Mistral-7B-Instruct-v0.3.*
-
 ---
 
-## Dynamic Scenario Generation (V2)
+## Important Disclaimers
 
-In addition to the 5 baseline tasks, V2 supports **deterministic dynamic scenario generation** across multiple SQL dialects (`postgres`, `mysql`, `sqlite`) and difficulties (`easy`, `medium`, `hard`):
-
-```python
-from scenarios import ScenarioGenerator
-
-generator = ScenarioGenerator()
-scenario = generator.generate(seed=12345, dialect="postgres", difficulty="hard")
-```
-
-Dynamic scenarios are reproducible from seeds and verified via SQL AST parsing (`sqlglot`). Reset the environment with dynamic seeds via `/reset?task=generated&seed=12345&dialect=postgres&difficulty=hard`.
-
----
-
-## Restricted Ephemeral SQL Analysis Sandbox (V2)
-
-Phase 7 introduces a **restricted ephemeral SQLite analysis sandbox** (`sandbox/`) with application-level execution controls for benchmark query verification:
-
-- **In-Memory Execution**: Runs strictly inside `sqlite3.connect(":memory:")` with zero disk persistence.
-- **Fail-Closed Policy**: Blocks `DROP`, `TRUNCATE`, `ALTER`, `ATTACH`, `DETACH`, `PRAGMA`, `INSERT`, `UPDATE`, `DELETE`, `REPLACE`, `load_extension`, and multi-statement queries.
-- **Query Plan Analysis**: Extracts normalized `EXPLAIN QUERY PLAN` evidence for performance diagnostic verification.
-- **Resource Limits**: Step limits via progress handler, 100-row result truncation, and 100KB query string limits.
-- **Data Isolation**: Never connects to production databases, external network endpoints, or host filesystems.
+- **Security & Privacy Boundary**: The privacy gateway and prompt isolation manager provide application-level safeguards for benchmark evaluation. They do NOT constitute formal enterprise compliance certification or a guarantee of perfect privacy against all novel attacks.
+- **Database Sandbox**: The analysis sandbox operates in an ephemeral in-memory SQLite container with read-only application controls. It is designed for benchmark query plan inspection and does not connect to production databases.
