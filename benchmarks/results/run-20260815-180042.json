@@ -1,0 +1,389 @@
+{
+  "run_id": "run-20260815-180042",
+  "timestamp": "2026-08-15T18:00:42.685337+00:00",
+  "runner_version": "1.0.0",
+  "git_commit": "3ee01fc",
+  "dataset_canonical_sha256": "5342c666ce1e774b443ccd6446adecc9d2135d008237681027d393269b295dde",
+  "dataset_scenario_count": 300,
+  "config": {
+    "dataset_path": "C:\\Users\\KIIT\\Desktop\\Hackathon\\sql-review-env\\benchmarks\\v3_dataset.json",
+    "provider": "mock",
+    "model_name": "MockModelProvider",
+    "seed": 42,
+    "max_scenarios": 10,
+    "dialect": null,
+    "difficulty": null,
+    "issue_category": null,
+    "output_dir": "C:\\Users\\KIIT\\Desktop\\Hackathon\\sql-review-env\\benchmarks\\results",
+    "no_llm_mode": true,
+    "run_id": null
+  },
+  "metrics": {
+    "total_scenarios": 300,
+    "executed_scenarios": 10,
+    "successful_scenarios": 0,
+    "failed_scenarios": 10,
+    "macro_precision": 0.0,
+    "macro_recall": 0.0,
+    "macro_f1": 0.0,
+    "micro_precision": 0.0,
+    "micro_recall": 0.0,
+    "micro_f1": 0.0,
+    "location_accuracy": 0.0,
+    "fix_accuracy": 0.0,
+    "total_tp": 0,
+    "total_fp": 0,
+    "total_fn": 5,
+    "total_duplicates": 0,
+    "by_dialect": {
+      "postgres": {
+        "count": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      },
+      "mysql": {
+        "count": 4,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      },
+      "sqlite": {
+        "count": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "count": 5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      },
+      "medium": {
+        "count": 2,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      },
+      "hard": {
+        "count": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      },
+      "extreme": {
+        "count": 0,
+        "macro_f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    },
+    "by_issue_category": {
+      "sql_injection": {
+        "count": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      },
+      "unnecessary_columns": {
+        "count": 0,
+        "macro_f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "missing_index": {
+        "count": 0,
+        "macro_f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "inefficient_join": {
+        "count": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      },
+      "n_plus_one": {
+        "count": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      }
+    },
+    "by_benign_status": {
+      "benign": {
+        "count": 5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      },
+      "non_benign": {
+        "count": 5,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      },
+      "adversarial": {
+        "count": 3,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      }
+    }
+  },
+  "scenario_results": [
+    {
+      "scenario_id": "v3-pg-0007",
+      "dialect": "postgres",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "EVALUATION_ERROR",
+      "findings": [],
+      "evaluation": {
+        "normalized_score": 0.01,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.81,
+      "error_message": "Runtime error during scenario evaluation: 'EvaluationResult' object has no attribute 'tp_count'"
+    },
+    {
+      "scenario_id": "v3-sq-0040",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "EVALUATION_ERROR",
+      "findings": [],
+      "evaluation": {
+        "normalized_score": 0.01,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.27,
+      "error_message": "Runtime error during scenario evaluation: 'EvaluationResult' object has no attribute 'tp_count'"
+    },
+    {
+      "scenario_id": "v3-my-0038",
+      "dialect": "mysql",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "EVALUATION_ERROR",
+      "findings": [],
+      "evaluation": {
+        "normalized_score": 0.01,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.18,
+      "error_message": "Runtime error during scenario evaluation: 'EvaluationResult' object has no attribute 'tp_count'"
+    },
+    {
+      "scenario_id": "v3-my-0090",
+      "dialect": "mysql",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "inefficient_join"
+      ],
+      "status": "EVALUATION_ERROR",
+      "findings": [],
+      "evaluation": {
+        "normalized_score": 0.01,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.14,
+      "error_message": "Runtime error during scenario evaluation: 'EvaluationResult' object has no attribute 'tp_count'"
+    },
+    {
+      "scenario_id": "v3-my-0033",
+      "dialect": "mysql",
+      "difficulty": "hard",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "EVALUATION_ERROR",
+      "findings": [],
+      "evaluation": {
+        "normalized_score": 0.01,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.14,
+      "error_message": "Runtime error during scenario evaluation: 'EvaluationResult' object has no attribute 'tp_count'"
+    },
+    {
+      "scenario_id": "v3-sq-0051",
+      "dialect": "sqlite",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "EVALUATION_ERROR",
+      "findings": [],
+      "evaluation": {
+        "normalized_score": 0.01,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.15,
+      "error_message": "Runtime error during scenario evaluation: 'EvaluationResult' object has no attribute 'tp_count'"
+    },
+    {
+      "scenario_id": "v3-pg-0093",
+      "dialect": "postgres",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "n_plus_one"
+      ],
+      "status": "EVALUATION_ERROR",
+      "findings": [],
+      "evaluation": {
+        "normalized_score": 0.01,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.21,
+      "error_message": "Runtime error during scenario evaluation: 'EvaluationResult' object has no attribute 'tp_count'"
+    },
+    {
+      "scenario_id": "v3-pg-0021",
+      "dialect": "postgres",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "EVALUATION_ERROR",
+      "findings": [],
+      "evaluation": {
+        "normalized_score": 0.01,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.13,
+      "error_message": "Runtime error during scenario evaluation: 'EvaluationResult' object has no attribute 'tp_count'"
+    },
+    {
+      "scenario_id": "v3-my-0020",
+      "dialect": "mysql",
+      "difficulty": "hard",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "EVALUATION_ERROR",
+      "findings": [],
+      "evaluation": {
+        "normalized_score": 0.01,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.18,
+      "error_message": "Runtime error during scenario evaluation: 'EvaluationResult' object has no attribute 'tp_count'"
+    },
+    {
+      "scenario_id": "v3-sq-0026",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "EVALUATION_ERROR",
+      "findings": [],
+      "evaluation": {
+        "normalized_score": 0.01,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.19,
+      "error_message": "Runtime error during scenario evaluation: 'EvaluationResult' object has no attribute 'tp_count'"
+    }
+  ]
+}
