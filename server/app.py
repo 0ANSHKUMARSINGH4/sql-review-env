@@ -320,12 +320,12 @@ def explain_sql(req: SQLExplainRequest):
     plan_steps = []
     for step in exec_res.plan:
         plan_steps.append({
-            "step_id": step.step_id,
-            "parent_id": step.parent_id,
+            "step_id": getattr(step, "id", getattr(step, "step_id", 0)),
+            "parent_id": getattr(step, "parent", getattr(step, "parent_id", 0)),
             "detail": step.detail,
             "operation": step.operation,
-            "table_name": step.table_name,
-            "uses_index": step.uses_index,
+            "table_name": getattr(step, "table", getattr(step, "table_name", "")),
+            "uses_index": getattr(step, "index", getattr(step, "uses_index", None)),
         })
 
     return {
