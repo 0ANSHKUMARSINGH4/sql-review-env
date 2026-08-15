@@ -5,3 +5,5 @@ openenv-core
 httpx
 openai
 requests
+pytest
+sqlglot>=30.0.0

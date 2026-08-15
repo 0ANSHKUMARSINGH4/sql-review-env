@@ -9,7 +9,8 @@ requires-python = ">=3.10"
 
 dependencies = [
     "numpy",
-    "openenv>=0.1.13"
+    "openenv>=0.1.13",
+    "sqlglot>=30.0.0"
 ]
 
 [project.scripts]
