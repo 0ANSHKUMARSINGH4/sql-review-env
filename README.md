@@ -1,3 +1,13 @@
+---
+title: SQL Review Environment
+emoji: 🛡️
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_port: 7860
+short_description: Secure SQL Analysis & Benchmarking Platform
+---
+
 # SQL Review Environment
 
 An OpenEnv-compatible, privacy-preserving platform for secure SQL analysis and benchmark evaluation.
