@@ -18,46 +18,53 @@ tags:
 
 ---
 
-## Key Architecture & Data Flow
+## Why This Exists
 
-```text
-               Raw SQL / Schema
-                      │
-                      ▼
-               Privacy Gateway
-            (Redaction & Tokenization)
-                      │
-                      ▼
-            Prompt Isolation Boundary
-         (System vs Untrusted SQL framing)
-                      │
-                      ▼
-                Model Provider
-          (Mock / OpenAI-compatible)
-                      │
-                      ▼
-           Structured Findings (JSON)
-                      │
-                      ▼
-            Evidence-Based Evaluator
-      (Precision, Recall, F1, Location, Fix)
-                      │
-                      ▼
-              Reward + Metrics State
+Automated code review agents are rapidly being deployed in engineering workflows. However, existing benchmarks either lack privacy controls, rely on fragile keyword matching, or fail to isolate LLM evaluation from untrusted inputs. 
+
+`sql-review-env` V2 addresses these challenges by providing:
+1. **Privacy Boundary**: Pre-inference tokenization redacting sensitive credentials and PII.
+2. **Prompt Injection Isolation**: Structural delimiter framing ensuring untrusted code cannot override agent system instructions.
+3. **Evidence-Based Multi-Dimensional Evaluator**: Precision/Recall/F1 metrics scoring issue identification, line numbers, evidence quality, severity, and remediation recommendations.
+4. **Deterministic Multi-Dialect Scenario Generator**: Seed-reproducible dynamic task creation across `PostgreSQL`, `MySQL`, and `SQLite`.
+5. **Restricted Analysis Sandbox**: In-memory ephemeral SQLite container for query plan (`EXPLAIN QUERY PLAN`) diagnostic verification.
+
+---
+
+## Architecture & Trust Boundary
+
+```mermaid
+graph TD
+    RawInput[Raw SQL / Schema Scenario] --> Gateway[Privacy Gateway<br/>Secret & PII Detection]
+    Gateway --> Tokenizer[Ephemeral Tokenization<br/>EMAIL_001, PASSWORD_001]
+    Tokenizer --> Isolation[Prompt Isolation Manager<br/>System vs Untrusted framing]
+    Isolation --> Provider[Model Provider<br/>Mock / OpenAI-Compatible]
+    Provider --> OutputValidation[Pydantic Output Validator<br/>StructuredFinding Array]
+    
+    RawInput --> ASTAnalyzer[Multi-Dialect AST Analyzer<br/>PostgreSQL / MySQL / SQLite]
+    RawInput --> Sandbox[Restricted Ephemeral Sandbox<br/>SQLite :memory:]
+    
+    ASTAnalyzer --> Evaluator[Evidence-Based Evaluator<br/>Precision, Recall, F1]
+    Sandbox --> Evaluator
+    OutputValidation --> Evaluator
+    
+    Evaluator --> RewardState[OpenEnv Reward & Observability Metrics]
+    RewardState --> ReportExporter[Zero-Leakage Report Exporter<br/>/api/report & Dashboard]
 ```
 
 ---
 
-## V2 Highlights
+## V2 Module Overview
 
-1. **Privacy Foundation (`privacy/`)**: Ephemeral tokenization (`<EMAIL_001>`, `<PASSWORD_001>`) redacting credentials, API keys, PII, and infrastructure tokens before LLM submission. Fail-closed `ENTERPRISE_PRIVACY_MODE=true` enforcement.
-2. **Prompt-Injection Isolation (`security/`)**: Structural delimiter framing ensuring untrusted SQL queries, comments, and schemas cannot override system instructions. Advisory injection scanner for prompt override signals.
-3. **Multi-Dialect AST SQL Analysis (`sql_analysis/`)**: Multi-dialect (`PostgreSQL`, `MySQL`, `SQLite`) AST parsing via `sqlglot` producing verified ground truth issues while distinguishing between *confirmed* facts and *candidate* inferences.
-4. **Evidence-Based Multi-Dimensional Grading (`grading/`)**: Five-dimensional evaluation scoring issue classification, line location, evidence quality, severity, and remediation recommendations with precision, recall, F1 metrics and strict false-positive penalties (-0.75).
-5. **Deterministic Dynamic Scenario Generation (`scenarios/`)**: Seed-reproducible dynamic scenario generation across dialects and difficulty levels (`easy`, `medium`, `hard`).
-6. **Restricted Ephemeral SQL Sandbox (`sandbox/`)**: Ephemeral in-memory SQLite (`:memory:`) analysis sandbox executing `EXPLAIN QUERY PLAN` with application-level security policies blocking `DROP`, `TRUNCATE`, `ALTER`, `ATTACH`, `DETACH`, `PRAGMA`, `INSERT`, `UPDATE`, `DELETE`, `REPLACE`, `load_extension`, and multi-statement SQL.
-7. **Enterprise Observability & Reporting (`reporting/`)**: Machine-readable `/metrics` and `/api/report` endpoints with zero secret/PII leakage guarantees.
-8. **No-LLM Deterministic Mode**: Offline benchmark evaluation mode using `NO_LLM_MODE=true` or `LLM_ENABLED=false`.
+| Component | Directory | Description |
+| :--- | :--- | :--- |
+| **Privacy Foundation** | `privacy/` | Redacts API keys, credentials, tokens, PII via ephemeral tokenization before LLM submission. Fail-closed `ENTERPRISE_PRIVACY_MODE`. |
+| **Security & Isolation** | `security/` | Structural trust boundary separation framing untrusted SQL separately from system prompt. Advisory injection scanner. |
+| **SQL AST Analysis** | `sql_analysis/` | Multi-dialect (`sqlglot`) AST analysis generating verified ground truth while distinguishing *confirmed* facts vs *candidate* inferences. |
+| **Evidence Evaluator** | `grading/` | 5-dimensional evaluation (issue, line, evidence, severity, fix) with precision/recall/F1 and strict false-positive penalties (-0.75). |
+| **Scenario Generator** | `scenarios/` | Deterministic, seed-reproducible dynamic benchmark generation supporting `postgres`, `mysql`, and `sqlite`. |
+| **Restricted Sandbox** | `sandbox/` | In-memory ephemeral SQLite (`:memory:`) executing `EXPLAIN QUERY PLAN` with read-only fail-closed execution policies. |
+| **Enterprise Observability** | `reporting/` | Safe JSON/HTML report exporter with zero secret leakage guarantees and `/metrics` observability API. |
 
 ---
 
@@ -72,16 +79,24 @@ tags:
 
 ---
 
-## Setup & Execution
+## Quick Start
 
-### Local Development
+### Local Installation & Server Execution
 ```bash
+git clone https://github.com/0ANSHKUMARSINGH4/sql-review-env.git
+cd sql-review-env
 pip install -r requirements.txt
-python -m pytest tests/ -v
+
+# Run server
 uvicorn server.app:app --host 0.0.0.0 --port 7860
 ```
 
-### Reproducible Baseline Benchmark
+### Run Full Test Suite
+```bash
+python -m pytest tests/ -v
+```
+
+### Reproducible Baseline Evaluation (No-LLM Mode)
 ```bash
 export MODEL_PROVIDER=mock
 export LLM_ENABLED=false
@@ -90,7 +105,16 @@ python inference.py
 
 ---
 
-## Important Disclaimers
+## Docker Support
 
-- **Security & Privacy Boundary**: The privacy gateway and prompt isolation manager provide application-level safeguards for benchmark evaluation. They do NOT constitute formal enterprise compliance certification or a guarantee of perfect privacy against all novel attacks.
+```bash
+docker build -t sql-review-env .
+docker run -p 7860:7860 sql-review-env
+```
+
+---
+
+## Security & Privacy Disclaimers
+
+- **Security & Privacy Boundary**: The privacy gateway and prompt isolation manager provide application-level safeguards for benchmark evaluation. They do NOT constitute formal enterprise compliance certification or a guarantee of perfect privacy against all novel attack techniques.
 - **Database Sandbox**: The analysis sandbox operates in an ephemeral in-memory SQLite container with read-only application controls. It is designed for benchmark query plan inspection and does not connect to production databases.
