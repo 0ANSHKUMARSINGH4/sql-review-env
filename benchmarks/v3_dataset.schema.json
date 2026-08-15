@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SQLReviewV3BenchmarkScenario",
+  "type": "object",
+  "required": [
+    "scenario_id",
+    "version",
+    "dialect",
+    "difficulty",
+    "query",
+    "schema_context",
+    "is_benign",
+    "is_adversarial",
+    "ground_truth",
+    "provenance"
+  ],
+  "properties": {
+    "scenario_id": {
+      "type": "string",
+      "minLength": 3
+    },
+    "version": {
+      "type": "string"
+    },
+    "dialect": {
+      "type": "string",
+      "enum": ["postgres", "mysql", "sqlite"]
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": ["easy", "medium", "hard", "extreme"]
+    },
+    "query": {
+      "type": "string",
+      "minLength": 5
+    },
+    "schema_context": {
+      "type": "string"
+    },
+    "is_benign": {
+      "type": "boolean"
+    },
+    "is_adversarial": {
+      "type": "boolean"
+    },
+    "ground_truth": {
+      "type": "object",
+      "required": ["issues", "total_issues_count"],
+      "properties": {
+        "total_issues_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["issue", "severity", "line", "evidence", "recommendation", "status", "confidence"],
+            "properties": {
+              "issue": {
+                "type": "string",
+                "enum": ["sql_injection", "n_plus_one", "missing_index", "inefficient_join", "unnecessary_columns"]
+              },
+              "severity": {
+                "type": "string",
+                "enum": ["critical", "high", "medium", "low", "info"]
+              },
+              "line": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "evidence": {
+                "type": "string"
+              },
+              "recommendation": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["confirmed", "candidate"]
+              },
+              "confidence": {
+                "type": "number",
+                "minimum": 0.0,
+                "maximum": 1.0
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["author", "created_at", "human_verified", "source"],
+      "properties": {
+        "author": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "human_verified": {
+          "type": "boolean"
+        },
+        "source": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
