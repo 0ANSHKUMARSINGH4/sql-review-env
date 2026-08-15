@@ -16,7 +16,7 @@ from benchmarks.validator import BenchmarkValidator
 from benchmarks.v3_validation import compute_canonical_dataset_hash
 
 
-app = FastAPI(title="SQL Review Environment V4 — Interactive Platform")
+app = FastAPI(title="SQL Review Environment — Secure SQL Analysis & Benchmarking Platform")
 
 # Global singleton instances
 env = SQLReviewEnv()
@@ -48,6 +48,69 @@ def load_dataset_raw() -> List[Dict[str, Any]]:
         return []
     with open(DATASET_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def categorize_run_status(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Computes truthful evidence-integrity status for a benchmark run.
+    Ensures failed external runs are never presented as valid zero-score model evaluations.
+    """
+    config = data.get("config", {})
+    metrics = data.get("metrics", {})
+    provider = (config.get("provider") or "mock").lower()
+    raw_model = config.get("model_name") or "Unknown"
+
+    executed = metrics.get("executed_scenarios", 0)
+    successful = metrics.get("successful_scenarios", 0)
+    failed = metrics.get("failed_scenarios", 0)
+
+    if provider == "mock":
+        return {
+            "status_code": "MOCK_BASELINE",
+            "status_label": "Mock Baseline",
+            "badge_class": "badge-medium",
+            "is_evaluated": True,
+            "macro_f1": metrics.get("macro_f1"),
+            "macro_precision": metrics.get("macro_precision"),
+            "macro_recall": metrics.get("macro_recall"),
+            "location_accuracy": metrics.get("location_accuracy"),
+            "fix_accuracy": metrics.get("fix_accuracy"),
+            "model_name": "MockModelProvider",
+            "provider": "mock",
+            "note": "MockModelProvider — deterministic infrastructure baseline",
+        }
+    elif successful == 0 or failed > 0 and successful == 0:
+        model_display = raw_model if raw_model and raw_model != "MockModelProvider" else "OpenAI-compatible Provider"
+        return {
+            "status_code": "FAILED_AUTHENTICATION",
+            "status_label": "Inference Failed",
+            "badge_class": "badge-critical",
+            "is_evaluated": False,
+            "macro_f1": None,
+            "macro_precision": None,
+            "macro_recall": None,
+            "location_accuracy": None,
+            "fix_accuracy": None,
+            "model_name": model_display,
+            "provider": provider,
+            "note": "External model run — inference failed (API authentication/connection unavailable)",
+            "failure_reason": "External inference was not evaluated because API authentication/connection was unavailable.",
+        }
+    else:
+        return {
+            "status_code": "SUCCESS",
+            "status_label": "Verified Model Run",
+            "badge_class": "badge-low",
+            "is_evaluated": True,
+            "macro_f1": metrics.get("macro_f1"),
+            "macro_precision": metrics.get("macro_precision"),
+            "macro_recall": metrics.get("macro_recall"),
+            "location_accuracy": metrics.get("location_accuracy"),
+            "fix_accuracy": metrics.get("fix_accuracy"),
+            "model_name": raw_model,
+            "provider": provider,
+            "note": "Verified external model evaluation run",
+        }
 
 
 # ============================================================================
@@ -278,7 +341,7 @@ def explain_sql(req: SQLExplainRequest):
 
 @app.get("/api/benchmark/results")
 def list_benchmark_results():
-    """Lists available persisted benchmark run JSON artifacts."""
+    """Lists available persisted benchmark run JSON artifacts with truthful run status classification."""
     if not RESULTS_DIR.exists():
         return {"runs": []}
 
@@ -287,15 +350,21 @@ def list_benchmark_results():
         try:
             with open(p, "r", encoding="utf-8") as f:
                 data = json.load(f)
+                status_info = categorize_run_status(data)
                 runs.append({
                     "run_id": data.get("run_id", p.stem),
                     "timestamp": data.get("timestamp"),
-                    "provider": data.get("config", {}).get("provider"),
-                    "model_name": data.get("config", {}).get("model_name"),
+                    "provider": status_info["provider"],
+                    "model_name": status_info["model_name"],
                     "scenarios_count": len(data.get("scenario_results", [])),
-                    "macro_f1": data.get("metrics", {}).get("macro_f1"),
-                    "macro_precision": data.get("metrics", {}).get("macro_precision"),
-                    "macro_recall": data.get("metrics", {}).get("macro_recall"),
+                    "macro_f1": status_info["macro_f1"],
+                    "macro_precision": status_info["macro_precision"],
+                    "macro_recall": status_info["macro_recall"],
+                    "status_code": status_info["status_code"],
+                    "status_label": status_info["status_label"],
+                    "badge_class": status_info["badge_class"],
+                    "is_evaluated": status_info["is_evaluated"],
+                    "note": status_info["note"],
                     "filename": p.name,
                 })
         except Exception:
@@ -307,13 +376,12 @@ def list_benchmark_results():
 
 @app.get("/api/benchmark/results/{run_id}")
 def get_benchmark_result_detail(run_id: str):
-    """Returns detailed persisted benchmark run JSON artifact."""
+    """Returns detailed persisted benchmark run JSON artifact with classified status."""
     if not RESULTS_DIR.exists():
         raise HTTPException(status_code=404, detail="Results directory not found.")
 
     target_path = RESULTS_DIR / f"{run_id}.json"
     if not target_path.exists():
-        # Fallback check by matching run_id inside files
         for p in RESULTS_DIR.glob("*.json"):
             if p.stem == run_id:
                 target_path = p
@@ -325,6 +393,7 @@ def get_benchmark_result_detail(run_id: str):
     with open(target_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
+    data["status_info"] = categorize_run_status(data)
     return data
 
 
@@ -399,22 +468,22 @@ def health():
 
 
 # ============================================================================
-# PHASES V4.3 - V4.9 — INTERACTIVE PLATFORM WEB INTERFACE (SPA)
+# PHASES V4.1 — PRODUCT POLISH & EVIDENCE INTEGRITY WEB INTERFACE
 # ============================================================================
 
 @app.get("/", response_class=HTMLResponse)
 def get_platform_ui():
     """
-    Renders the state-of-the-art interactive web platform for SQL Review Environment V4.
-    Includes SQL Analyzer Editor, Sandbox Playground, Benchmark Explorer, Benchmark Dashboard,
-    Run Comparison, and Portfolio & Architecture documentation.
+    Renders the polished enterprise product web platform for SQL Review Environment.
+    Includes Review Editor, Sandbox Playground, Benchmark Explorer, Baseline Dashboard,
+    Run Comparison, and Architecture & Documentation.
     """
     html = """<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SQL Review Environment V2 - Enterprise Observability</title>
+  <title>SQL Review Environment — Secure SQL Analysis & Benchmarking Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -447,7 +516,7 @@ def get_platform_ui():
 
     /* Header Navigation */
     header {
-      background: rgba(21, 29, 42, 0.8);
+      background: rgba(21, 29, 42, 0.85);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border-color);
       position: sticky;
@@ -464,12 +533,26 @@ def get_platform_ui():
       display: flex;
       align-items: center;
       gap: 12px;
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       font-weight: 700;
+      color: var(--text-main);
+      text-decoration: none;
+    }
+    .brand-logo {
+      font-size: 1.4rem;
+    }
+    .brand-title {
       background: linear-gradient(135deg, #60A5FA, #C084FC);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-decoration: none;
+    }
+    .brand-subtitle {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-left: 6px;
+      padding-left: 8px;
+      border-left: 1px solid var(--border-color);
     }
 
     .nav-tabs {
@@ -510,7 +593,7 @@ def get_platform_ui():
       gap: 8px;
       font-size: 0.8rem;
       font-weight: 600;
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 20px;
       background: rgba(16, 185, 129, 0.15);
       color: var(--accent-emerald);
@@ -550,9 +633,9 @@ def get_platform_ui():
       width: 100%;
       background: #0F172A;
       border: 1px solid var(--border-color);
-      color: var(--text-main);
+      color: #F8FAFC;
       border-radius: 8px;
-      padding: 10px 14px;
+      padding: 12px 14px;
       font-family: var(--font-mono);
       font-size: 0.88rem;
       outline: none;
@@ -642,13 +725,30 @@ def get_platform_ui():
       align-items: center;
       justify-content: space-between;
     }
+
+    .indicator-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .indicator-pill {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
   </style>
 </head>
 <body>
 
   <header>
     <a href="#" class="brand">
-      <span>🛡️ SQL Review Environment V2 / V4</span>
+      <span class="brand-logo">🛡️</span>
+      <span class="brand-title">SQL Review Environment</span>
+      <span class="brand-subtitle">Secure SQL Analysis & Benchmarking Platform</span>
     </a>
     <nav class="nav-tabs">
       <button class="nav-btn active" onclick="switchTab('tab-review')">Interactive Review</button>
@@ -659,15 +759,15 @@ def get_platform_ui():
       <button class="nav-btn" onclick="switchTab('tab-architecture')">Architecture & Docs</button>
     </nav>
     <div class="header-badge">
-      <span>Privacy Mode</span>
+      <span>🔒 Privacy Gateway Active</span>
     </div>
   </header>
 
   <main>
     <!-- TAB 1: INTERACTIVE SQL REVIEW -->
     <div id="tab-review" class="tab-content active">
-      <h2>Interactive SQL Review & AST Analysis</h2>
-      <p class="subtitle">Paste raw SQL queries and DDL schema context to run real-time static AST analysis, vulnerability detection, and evidence extraction.</p>
+      <h2>Review SQL for security & performance issues</h2>
+      <p class="subtitle">Static AST analysis and vulnerability detection executed at the application layer. No production database credentials or connection required.</p>
 
       <div class="grid-2">
         <div class="card">
@@ -700,7 +800,10 @@ def get_platform_ui():
           <div class="card">
             <h3>Analysis Findings</h3>
             <div id="review-findings-container">
-              <p style="color: var(--text-muted); font-size: 0.88rem;">No analysis run yet.</p>
+              <div style="padding: 20px; text-align: center; color: var(--text-muted);">
+                <p style="font-weight: 600; font-size: 1rem; color: #CBD5E1; margin-bottom: 4px;">No analysis run yet</p>
+                <p style="font-size: 0.85rem;">Paste a query and click 'Run AST Analysis' to inspect AST findings, line numbers, and recommendations.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -709,8 +812,14 @@ def get_platform_ui():
 
     <!-- TAB 2: QUERY PLAN SANDBOX PLAYGROUND -->
     <div id="tab-explain" class="tab-content">
-      <h2>Restricted Query Plan Sandbox Playground</h2>
+      <h2>Query Plan Sandbox</h2>
       <p class="subtitle">Execute queries inside an isolated, ephemeral SQLite sandbox. Evaluates SandboxPolicyValidator rules and extracts EXPLAIN QUERY PLAN execution steps.</p>
+
+      <div class="indicator-bar">
+        <span class="indicator-pill">🔒 Isolated execution</span>
+        <span class="indicator-pill">⚡ EXPLAIN only</span>
+        <span class="indicator-pill">🛡️ Policy enforced</span>
+      </div>
 
       <div class="grid-2">
         <div class="card">
@@ -746,8 +855,16 @@ def get_platform_ui():
 
     <!-- TAB 3: BENCHMARK EXPLORER -->
     <div id="tab-explorer" class="tab-content">
-      <h2>Independent Benchmark Dataset Explorer (300 Scenarios)</h2>
-      <p class="subtitle">Browse the complete, frozen V3 independent benchmark dataset. Filter by dialect, difficulty, issue category, benign, or adversarial status.</p>
+      <h2>Benchmark Explorer</h2>
+      <p class="subtitle">Explore 300 independent SQL security & performance scenarios.</p>
+
+      <div class="banner-box" style="margin-bottom: 20px;">
+        <div>
+          <strong>📊 Dataset Summary:</strong> 300 scenarios · 3 SQL dialects · 5 issue categories
+          <br><span style="font-size:0.8rem; color:#BFDBFE;">100 PostgreSQL · 100 MySQL · 100 SQLite</span>
+        </div>
+        <span class="badge-tag badge-low">Synthetic Benchmark Data — No Production Credentials</span>
+      </div>
 
       <div class="card" style="margin-bottom: 24px;">
         <div class="grid-4" style="align-items: flex-end;">
@@ -812,16 +929,16 @@ def get_platform_ui():
 
     <!-- TAB 4: BENCHMARK DASHBOARD -->
     <div id="tab-dashboard" class="tab-content">
-      <div class="banner-box">
+      <div class="banner-box" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); color: #DDD6FE;">
         <div>
-          <strong>📌 Recorded Baseline Artifact:</strong> MockModelProvider — deterministic infrastructure baseline
-          <br><span style="font-size:0.78rem; color:#BFDBFE;">Dataset SHA-256: 5342c666ce1e774b443ccd6446adecc9d2135d008237681027d393269b295dde</span>
+          <strong>📌 Benchmark Infrastructure Baseline:</strong> Deterministic offline reference run across the 300-scenario benchmark.
+          <br><span style="font-size:0.78rem; color:#C4B5FD;">This baseline validates the benchmark/evaluation pipeline. It is not a measurement of external LLM capabilities.</span>
         </div>
-        <span class="badge-tag badge-medium">Persisted Baseline</span>
+        <span class="badge-tag badge-medium">Mock Baseline</span>
       </div>
 
-      <h2>Recorded Benchmark Metrics</h2>
-      <p class="subtitle">Official evaluation metrics computed across all 300 frozen benchmark scenarios in `benchmarks/results/run-v3-mock-300.json`.</p>
+      <h2>Recorded Baseline Metrics</h2>
+      <p class="subtitle">Official infrastructure baseline evaluation metrics recorded in `benchmarks/results/run-v3-mock-300.json`.</p>
 
       <div class="grid-4" style="margin-bottom: 24px;">
         <div class="stat-card">
@@ -882,8 +999,8 @@ def get_platform_ui():
 
       <div class="banner-box" style="background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); color: #FDE68A;">
         <div>
-          <strong>ℹ️ Provider Status Notice:</strong> External LLM benchmarking is currently deferred (No OPENAI_API_KEY or HF_TOKEN is configured in local environment).
-          <br><span style="font-size:0.78rem;">The deterministic MockModelProvider baseline is displayed below. No external model comparisons have been fabricated.</span>
+          <strong>ℹ️ External Model Status:</strong> External LLM benchmarking is currently deferred (No OPENAI_API_KEY or HF_TOKEN is configured in local environment).
+          <br><span style="font-size:0.78rem;">The deterministic MockModelProvider baseline is displayed below. Failed external inference attempts are clearly flagged and never assigned false zero scores.</span>
         </div>
       </div>
 
@@ -899,10 +1016,11 @@ def get_platform_ui():
               <th>Scenarios</th>
               <th>Macro F1</th>
               <th>Status</th>
+              <th>Note</th>
             </tr>
           </thead>
           <tbody id="comparison-table-body">
-            <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Loading benchmark run artifacts...</td></tr>
+            <tr><td colspan="8" style="text-align:center; color:var(--text-muted);">Loading benchmark run artifacts...</td></tr>
           </tbody>
         </table>
       </div>
@@ -910,31 +1028,89 @@ def get_platform_ui():
 
     <!-- TAB 6: ARCHITECTURE & PORTFOLIO DOCS -->
     <div id="tab-architecture" class="tab-content">
-      <h2>Architecture & Methodology Overview</h2>
-      <p class="subtitle">Comprehensive engineering design and privacy guarantees of SQL Review Environment V4.</p>
+      <h2>System Architecture & Engineering Methodology</h2>
+      <p class="subtitle">Comprehensive overview of system design, static analysis pipeline, sandbox execution, privacy boundaries, and benchmark methodology.</p>
 
-      <div class="grid-2">
+      <div class="card" style="margin-bottom: 24px;">
+        <h3>📌 Technical Component Flow</h3>
+        <div class="code-box" style="color: #A78BFA; line-height: 1.7;">
+[ User Query / DDL Input ]
+        │
+        ▼
+[ Privacy Gateway ] ──► (Redacts Raw Secrets / PII ── Token Map Held In-Memory)
+        │
+        ▼
+[ SQL AST Parser ] ──► (Multi-Dialect SQLGlot: PostgreSQL, MySQL, SQLite)
+        │
+        ▼
+[ SQL Analyzer ]   ──► (Detects SQLi, N+1, Missing Indexes, Inefficient Joins)
+        │
+        ▼
+[ Sandbox Policy Validator ] ──► (Fail-Closed Check: Blocks DDL/DML/PRAGMAs)
+        │
+        ▼
+[ Ephemeral SQLite Sandbox ]  ──► (Executes EXPLAIN QUERY PLAN In-Memory)
+        │
+        ▼
+[ Evidence-Based Evaluator ]  ──► (Grades TP/FP/FN vs Immutable Ground Truth)
+        │
+        ▼
+[ Machine-Readable Report & Dashboard ]
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom: 24px;">
         <div class="card">
-          <h3>🔒 Privacy & Security Boundary</h3>
+          <h3>1. SQL Review Pipeline</h3>
           <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:12px;">
-            The <strong>PrivacyGateway</strong> strips raw credentials, secret tokens, and PII from SQL queries before LLM invocation. Token mapping tables are kept strictly isolated in memory and never persisted in output artifacts.
+            The static analysis engine parses queries into Abstract Syntax Trees (AST) using multi-dialect SQLGlot parser, identifying vulnerability patterns without requiring a active database connection.
           </p>
-          <ul style="font-size:0.88rem; color:var(--text-muted); padding-left:20px; line-height:1.8;">
-            <li>Zero raw secrets sent to LLMs</li>
-            <li>PromptIsolationManager wraps inputs inside <code>&lt;UNTRUSTED_SQL_CONTEXT&gt;</code> framing</li>
-            <li>SandboxPolicyValidator blocks destructive DDL/DML, PRAGMAs, and multi-statements</li>
+          <ul style="font-size:0.85rem; color:var(--text-muted); padding-left:20px; line-height:1.7;">
+            <li>SQL Injection: Parameterized query enforcement</li>
+            <li>Unnecessary Columns: SELECT * pattern detection</li>
+            <li>N+1 Queries: ORM loop trace analysis</li>
+            <li>Inefficient Joins: CROSS JOIN & cartesian products</li>
           </ul>
         </div>
 
         <div class="card">
-          <h3>📊 Independent Benchmark Dataset</h3>
+          <h3>2. Privacy & Security Boundary</h3>
           <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:12px;">
-            The V3 dataset consists of <strong>300 curator-declared scenarios</strong> (100 PostgreSQL, 100 MySQL, 100 SQLite) with deterministic SHA-256 hash <code>5342c666ce1e774b443ccd6446adecc9d2135d008237681027d393269b295dde</code>.
+            The <strong>PrivacyGateway</strong> sanitizes all inputs before any downstream processing or model prompt framing.
           </p>
-          <ul style="font-size:0.88rem; color:var(--text-muted); padding-left:20px; line-height:1.8;">
-            <li>Curator-declared ground truth is immutable and un-corrupted by AST parser limitations</li>
-            <li>100% of N+1 scenarios include explicit ORM loop trace comments</li>
-            <li>51 adversarial scenarios test prompt-injection resilience</li>
+          <ul style="font-size:0.85rem; color:var(--text-muted); padding-left:20px; line-height:1.7;">
+            <li>Synthetic password & API key redaction</li>
+            <li>Email & phone PII tokenization</li>
+            <li>Strict in-memory token map isolation</li>
+            <li><code>&lt;UNTRUSTED_SQL_CONTEXT&gt;</code> prompt framing</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>3. Ephemeral Query Sandbox</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:12px;">
+            Restricted in-memory SQLite sandbox for dynamic query plan inspection.
+          </p>
+          <ul style="font-size:0.85rem; color:var(--text-muted); padding-left:20px; line-height:1.7;">
+            <li>Fail-closed SandboxPolicyValidator</li>
+            <li>Blocks DROP, ALTER, TRUNCATE, PRAGMA, ATTACH</li>
+            <li>Step count and execution time limits</li>
+            <li>Row count truncation caps</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>4. Independent Benchmark Dataset</h3>
+          <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:12px;">
+            300 curator-declared scenarios with immutable ground truth (SHA-256: <code>5342c666...</code>).
+          </p>
+          <ul style="font-size:0.85rem; color:var(--text-muted); padding-left:20px; line-height:1.7;">
+            <li>100 PostgreSQL, 100 MySQL, 100 SQLite</li>
+            <li>111 Benign scenarios (false positive testing)</li>
+            <li>51 Adversarial scenarios (prompt injection resilience)</li>
+            <li>Evidence-Based Evaluator with line precision</li>
           </ul>
         </div>
       </div>
@@ -967,6 +1143,9 @@ def get_platform_ui():
         return;
       }
 
+      const findingsBox = document.getElementById('review-findings-container');
+      findingsBox.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted);"><p style="font-weight:600;">Analyzing SQL...</p></div>';
+
       try {
         const res = await fetch('/api/sql/analyze', {
           method: 'POST',
@@ -977,30 +1156,30 @@ def get_platform_ui():
 
         document.getElementById('review-numbered-sql').textContent = data.numbered_sql || query;
 
-        const findingsBox = document.getElementById('review-findings-container');
         if (!data.findings || data.findings.length === 0) {
-          findingsBox.innerHTML = '<div class="finding-card" style="border-left-color:#10B981;"><h4 style="color:#10B981;">✅ Zero Vulnerabilities Detected</h4><p style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">No AST anti-patterns or security issues found.</p></div>';
+          findingsBox.innerHTML = '<div class="finding-card" style="border-left-color:#10B981;"><h4 style="color:#10B981; font-size:1rem;">✓ No issues detected</h4><p style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">Static analysis found no matching security vulnerabilities or performance anti-patterns in this query.</p></div>';
           return;
         }
 
         let html = '';
         data.findings.forEach(f => {
-          const badgeClass = f.severity === 'critical' ? 'badge-critical' : (f.severity === 'high' ? 'badge-high' : 'badge-medium');
+          const sev = (f.severity || 'medium').toLowerCase();
+          const badgeClass = sev === 'critical' ? 'badge-critical' : (sev === 'high' ? 'badge-high' : (sev === 'medium' ? 'badge-medium' : 'badge-low'));
           html += `
             <div class="finding-card">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <strong style="color:#F1F5F9; font-size:0.95rem;">${f.issue} (Line ${f.line})</strong>
-                <span class="badge-tag ${badgeClass}">${f.severity}</span>
+                <strong style="color:#F1F5F9; font-size:0.95rem;">${f.issue} (Line ${f.line || 1})</strong>
+                <span class="badge-tag ${badgeClass}">${sev}</span>
               </div>
               <p style="font-size:0.85rem; color:#CBD5E1; margin-bottom:6px;"><strong>Evidence:</strong> ${f.evidence}</p>
-              <p style="font-size:0.85rem; color:#34D399;"><strong>Recommendation:</strong> ${f.recommendation}</p>
+              <p style="font-size:0.85rem; color:#34D399;"><strong>Recommendation:</strong> ${f.recommendation || 'Remediate identified structural pattern.'}</p>
             </div>
           `;
         });
         findingsBox.innerHTML = html;
 
       } catch (err) {
-        alert('Analysis request failed: ' + err.message);
+        findingsBox.innerHTML = `<div class="finding-card" style="border-left-color:#EF4444;"><h4 style="color:#EF4444;">Analysis Request Failed</h4><p style="font-size:0.85rem; color:#FCA5A5;">${err.message}</p></div>`;
       }
     }
 
@@ -1023,12 +1202,12 @@ def get_platform_ui():
 
         const statusBox = document.getElementById('explain-status-box');
         if (!data.allowed) {
-          statusBox.innerHTML = `<span class="badge-tag badge-critical">POLICY REJECTED</span> <span style="font-size:0.85rem; color:#FCA5A5; margin-left:8px;">${data.policy_reason}</span>`;
+          statusBox.innerHTML = `<span class="badge-tag badge-critical">QUERY BLOCKED</span> <span style="font-size:0.85rem; color:#FCA5A5; margin-left:8px;">${data.policy_reason}</span>`;
           document.getElementById('explain-steps-box').textContent = "-- Execution blocked by SandboxPolicyValidator";
           return;
         }
 
-        statusBox.innerHTML = `<span class="badge-tag badge-low">ALLOWED (${data.status.toUpperCase()})</span>`;
+        statusBox.innerHTML = `<span class="badge-tag badge-low">ALLOWED (${(data.status || 'OK').toUpperCase()})</span>`;
         document.getElementById('explain-time').textContent = data.execution_time_ms.toFixed(2) + ' ms';
         document.getElementById('explain-rows').textContent = data.row_count + (data.truncated ? ' (Truncated)' : '');
 
@@ -1139,21 +1318,23 @@ def get_platform_ui():
 
         const tbody = document.getElementById('comparison-table-body');
         if (!data.runs || data.runs.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No benchmark runs found.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">No benchmark runs found.</td></tr>';
           return;
         }
 
         let html = '';
         data.runs.forEach(r => {
+          const f1Display = r.is_evaluated && r.macro_f1 !== null ? r.macro_f1.toFixed(4) : 'N/A';
           html += `
             <tr>
               <td><strong>${r.run_id}</strong></td>
               <td>${r.timestamp ? r.timestamp.substring(0, 19).replace('T', ' ') : '-'}</td>
-              <td>${r.provider || 'mock'}</td>
-              <td>${r.model_name || 'MockModelProvider'}</td>
+              <td>${r.provider}</td>
+              <td>${r.model_name}</td>
               <td>${r.scenarios_count}</td>
-              <td><strong style="color:#60A5FA;">${r.macro_f1 ? r.macro_f1.toFixed(4) : '0.0000'}</strong></td>
-              <td><span class="badge-tag badge-medium">${r.provider === 'mock' ? 'Mock Baseline' : 'External Run'}</span></td>
+              <td><strong style="color:${r.is_evaluated ? '#60A5FA' : '#94A3B8'};">${f1Display}</strong></td>
+              <td><span class="badge-tag ${r.badge_class}">${r.status_label}</span></td>
+              <td style="font-size:0.8rem; color:var(--text-muted);">${r.note}</td>
             </tr>
           `;
         });

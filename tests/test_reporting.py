@@ -66,8 +66,8 @@ def test_api_report_endpoint(client):
 def test_dashboard_endpoint(client):
     res = client.get("/")
     assert res.status_code == 200
-    assert "SQL Review Environment V2" in res.text
-    assert "Privacy Mode" in res.text
+    assert "SQL Review Environment" in res.text
+    assert "Privacy" in res.text
 
 
 def test_no_llm_mode_execution(monkeypatch):

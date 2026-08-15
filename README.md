@@ -1,6 +1,6 @@
-# SQL Review Environment V2
+# SQL Review Environment
 
-An OpenEnv-compatible, privacy-preserving benchmark for evaluating AI agents on SQL security and performance review.
+An OpenEnv-compatible, privacy-preserving platform for secure SQL analysis and benchmark evaluation.
 
 [![Tests](https://github.com/0ANSHKUMARSINGH4/sql-review-env/actions/workflows/tests.yml/badge.svg)](https://github.com/0ANSHKUMARSINGH4/sql-review-env/actions)
 
@@ -8,7 +8,9 @@ An OpenEnv-compatible, privacy-preserving benchmark for evaluating AI agents on 
 
 ## What Is This?
 
-`sql-review-env` V2 is an open, application-level evaluation environment designed to measure how effectively AI code-review agents analyze database SQL queries and schemas for security vulnerabilities (e.g., SQL Injection) and performance bottlenecks (e.g., N+1 queries, missing indexes, inefficient JOINs).
+`sql-review-env` is an open, application-level evaluation platform designed to analyze SQL queries and schemas for security vulnerabilities (e.g., SQL Injection) and performance bottlenecks (e.g., N+1 queries, missing indexes, inefficient JOINs).
+
+Featuring an interactive web application and a frozen 300-scenario benchmark dataset (SHA-256: `5342c666ce1e774b443ccd6446adecc9d2135d008237681027d393269b295dde`), it combines pre-inference privacy safeguards, multi-dialect AST analysis, an in-memory SQLite sandbox, and an evidence-based evaluator.
 
 Unlike static linters or unconstrained LLM prompts, this environment simulates a structured code review flow using the **OpenEnv** specification. It provides pre-inference privacy safeguards, structural prompt isolation, multi-dialect AST validation, ephemeral query-plan analysis, and multi-dimensional scoring.
 

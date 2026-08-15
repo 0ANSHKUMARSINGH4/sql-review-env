@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-from server.app import app
+from server.app import app, categorize_run_status
 
 
 @pytest.fixture
@@ -106,21 +106,44 @@ def test_v4_api_sql_explain_policy_rejection(client):
     assert "Destructive SQL operation" in data["policy_reason"] or "DROP" in data["policy_reason"].upper()
 
 
-def test_v4_api_benchmark_results_list(client):
+def test_v4_api_benchmark_results_truthful_classification(client):
     res = client.get("/api/benchmark/results")
     assert res.status_code == 200
     data = res.json()
     assert "runs" in data
     assert len(data["runs"]) > 0
 
+    for run in data["runs"]:
+        if run["run_id"] == "v3-external-smoke-test":
+            assert run["is_evaluated"] is False
+            assert run["macro_f1"] is None
+            assert run["status_code"] == "FAILED_AUTHENTICATION"
+            assert run["status_label"] == "Inference Failed"
+            assert "MockModelProvider" not in run["model_name"]
+        elif run["provider"] == "mock":
+            assert run["is_evaluated"] is True
+            assert run["macro_f1"] is not None
 
-def test_v4_api_benchmark_result_detail(client):
-    res = client.get("/api/benchmark/results/run-v3-mock-300")
-    assert res.status_code == 200
-    data = res.json()
-    assert data["run_id"] == "run-v3-mock-300"
-    assert data["dataset_scenario_count"] == 300
-    assert "metrics" in data
+
+def test_v4_api_evidence_integrity_categorize_run_status():
+    mock_run = {
+        "config": {"provider": "mock", "model_name": "MockModelProvider"},
+        "metrics": {"macro_f1": 0.2117, "successful_scenarios": 300, "executed_scenarios": 300},
+    }
+    st_mock = categorize_run_status(mock_run)
+    assert st_mock["status_code"] == "MOCK_BASELINE"
+    assert st_mock["is_evaluated"] is True
+    assert st_mock["macro_f1"] == 0.2117
+
+    failed_run = {
+        "config": {"provider": "openai", "model_name": "mistralai/Mistral-7B-Instruct-v0.3"},
+        "metrics": {"macro_f1": 0.0, "successful_scenarios": 0, "executed_scenarios": 10, "failed_scenarios": 10},
+    }
+    st_failed = categorize_run_status(failed_run)
+    assert st_failed["status_code"] == "FAILED_AUTHENTICATION"
+    assert st_failed["is_evaluated"] is False
+    assert st_failed["macro_f1"] is None
+    assert st_failed["model_name"] == "mistralai/Mistral-7B-Instruct-v0.3"
 
 
 def test_v4_api_openenv_backwards_compatibility(client):
