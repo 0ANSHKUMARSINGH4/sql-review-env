@@ -106,3 +106,15 @@ scenario = generator.generate(seed=12345, dialect="postgres", difficulty="hard")
 ```
 
 Dynamic scenarios are reproducible from seeds and verified via SQL AST parsing (`sqlglot`). Reset the environment with dynamic seeds via `/reset?task=generated&seed=12345&dialect=postgres&difficulty=hard`.
+
+---
+
+## Restricted Ephemeral SQL Analysis Sandbox (V2)
+
+Phase 7 introduces a **restricted ephemeral SQLite analysis sandbox** (`sandbox/`) with application-level execution controls for benchmark query verification:
+
+- **In-Memory Execution**: Runs strictly inside `sqlite3.connect(":memory:")` with zero disk persistence.
+- **Fail-Closed Policy**: Blocks `DROP`, `TRUNCATE`, `ALTER`, `ATTACH`, `DETACH`, `PRAGMA`, `INSERT`, `UPDATE`, `DELETE`, `REPLACE`, `load_extension`, and multi-statement queries.
+- **Query Plan Analysis**: Extracts normalized `EXPLAIN QUERY PLAN` evidence for performance diagnostic verification.
+- **Resource Limits**: Step limits via progress handler, 100-row result truncation, and 100KB query string limits.
+- **Data Isolation**: Never connects to production databases, external network endpoints, or host filesystems.
