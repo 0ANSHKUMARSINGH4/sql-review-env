@@ -163,3 +163,9 @@ def test_persisted_result_json_valid_schema(tmp_path):
     assert "metrics" in data
     assert "scenario_results" in data
     assert len(data["scenario_results"]) == 3
+
+
+def test_openai_provider_model_name_initialization():
+    from security import OpenAIModelProvider
+    provider = OpenAIModelProvider(model_name="custom-model-gpt4")
+    assert provider.model_name == "custom-model-gpt4"

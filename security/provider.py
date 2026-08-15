@@ -54,14 +54,14 @@ class OpenAIModelProvider(ModelProvider):
     Configured strictly via environment variables. Never logs or prints credentials.
     """
 
-    def __init__(self):
+    def __init__(self, model_name: Optional[str] = None):
         from openai import OpenAI
         
         api_base = os.getenv("API_BASE_URL", "https://api-inference.huggingface.co/v1")
-        model_name = os.getenv("MODEL_NAME", "mistralai/Mistral-7B-Instruct-v0.3")
+        env_model = os.getenv("MODEL_NAME", "mistralai/Mistral-7B-Instruct-v0.3")
+        self.model_name = model_name or env_model
         api_key = os.getenv("OPENAI_API_KEY") or os.getenv("HF_TOKEN") or "dummy_key_for_mock"
         
-        self.model_name = model_name
         self.client = OpenAI(base_url=api_base, api_key=api_key)
 
     def generate(self, system_prompt: str, user_prompt: str) -> str:

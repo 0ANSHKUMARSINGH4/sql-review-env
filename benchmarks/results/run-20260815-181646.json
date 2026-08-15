@@ -1,0 +1,3462 @@
+{
+  "run_id": "run-20260815-181646",
+  "timestamp": "2026-08-15T18:16:46.074884+00:00",
+  "runner_version": "1.0.0",
+  "git_commit": "3ee01fc",
+  "dataset_canonical_sha256": "5342c666ce1e774b443ccd6446adecc9d2135d008237681027d393269b295dde",
+  "dataset_scenario_count": 300,
+  "config": {
+    "dataset_path": "C:\\Users\\KIIT\\Desktop\\Hackathon\\sql-review-env\\benchmarks\\v3_dataset.json",
+    "provider": "mock",
+    "model_name": "MockModelProvider",
+    "seed": 42,
+    "max_scenarios": 100,
+    "dialect": null,
+    "difficulty": null,
+    "issue_category": null,
+    "output_dir": "C:\\Users\\KIIT\\Desktop\\Hackathon\\sql-review-env\\benchmarks\\results",
+    "no_llm_mode": true,
+    "run_id": null
+  },
+  "metrics": {
+    "total_scenarios": 300,
+    "executed_scenarios": 100,
+    "successful_scenarios": 100,
+    "failed_scenarios": 0,
+    "macro_precision": 0.26,
+    "macro_recall": 0.255,
+    "macro_f1": 0.2567,
+    "micro_precision": 0.26,
+    "micro_recall": 0.4643,
+    "micro_f1": 0.3333,
+    "location_accuracy": 0.26,
+    "fix_accuracy": 0.26,
+    "total_tp": 26,
+    "total_fp": 74,
+    "total_fn": 30,
+    "total_duplicates": 0,
+    "by_dialect": {
+      "postgres": {
+        "count": 30,
+        "precision": 0.2333,
+        "recall": 0.4667,
+        "macro_f1": 0.3111
+      },
+      "mysql": {
+        "count": 26,
+        "precision": 0.2692,
+        "recall": 0.4667,
+        "macro_f1": 0.3415
+      },
+      "sqlite": {
+        "count": 44,
+        "precision": 0.2727,
+        "recall": 0.4615,
+        "macro_f1": 0.3429
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "count": 39,
+        "precision": 0.3333,
+        "recall": 0.7222,
+        "macro_f1": 0.4561
+      },
+      "medium": {
+        "count": 33,
+        "precision": 0.2121,
+        "recall": 0.35,
+        "macro_f1": 0.2642
+      },
+      "hard": {
+        "count": 28,
+        "precision": 0.2143,
+        "recall": 0.3333,
+        "macro_f1": 0.2609
+      },
+      "extreme": {
+        "count": 0,
+        "macro_f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0
+      }
+    },
+    "by_issue_category": {
+      "sql_injection": {
+        "count": 26,
+        "precision": 1.0,
+        "recall": 0.963,
+        "macro_f1": 0.9811
+      },
+      "unnecessary_columns": {
+        "count": 16,
+        "precision": 0.0625,
+        "recall": 0.0588,
+        "macro_f1": 0.0606
+      },
+      "missing_index": {
+        "count": 6,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      },
+      "inefficient_join": {
+        "count": 8,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      },
+      "n_plus_one": {
+        "count": 7,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      }
+    },
+    "by_benign_status": {
+      "benign": {
+        "count": 40,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      },
+      "non_benign": {
+        "count": 60,
+        "precision": 0.4333,
+        "recall": 0.4643,
+        "macro_f1": 0.4483
+      },
+      "adversarial": {
+        "count": 21,
+        "precision": 0.0,
+        "recall": 0.0,
+        "macro_f1": 0.0
+      }
+    }
+  },
+  "scenario_results": [
+    {
+      "scenario_id": "v3-pg-0007",
+      "dialect": "postgres",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.19,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0040",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.12,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0038",
+      "dialect": "mysql",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.14,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0090",
+      "dialect": "mysql",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "inefficient_join"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.11,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0033",
+      "dialect": "mysql",
+      "difficulty": "hard",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0051",
+      "dialect": "sqlite",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0093",
+      "dialect": "postgres",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "n_plus_one"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.16,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0021",
+      "dialect": "postgres",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0020",
+      "dialect": "mysql",
+      "difficulty": "hard",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.17,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0026",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.13,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0025",
+      "dialect": "mysql",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.14,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0096",
+      "dialect": "sqlite",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "n_plus_one"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.16,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0004",
+      "dialect": "postgres",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.15,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0021",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.09,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0006",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.11,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0098",
+      "dialect": "sqlite",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection",
+        "unnecessary_columns"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.5,
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.6667,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.09,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0092",
+      "dialect": "sqlite",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "n_plus_one"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.16,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0039",
+      "dialect": "mysql",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.12,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0059",
+      "dialect": "postgres",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "unnecessary_columns"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.09,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0074",
+      "dialect": "postgres",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "missing_index"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.09,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0046",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0002",
+      "dialect": "mysql",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.12,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0025",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.13,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0052",
+      "dialect": "sqlite",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0045",
+      "dialect": "postgres",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.11,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0034",
+      "dialect": "postgres",
+      "difficulty": "hard",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.14,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0047",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0007",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.13,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0087",
+      "dialect": "mysql",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "inefficient_join"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.12,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0006",
+      "dialect": "mysql",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.11,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0084",
+      "dialect": "sqlite",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "inefficient_join"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0024",
+      "dialect": "postgres",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0091",
+      "dialect": "postgres",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "n_plus_one"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.16,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0035",
+      "dialect": "mysql",
+      "difficulty": "hard",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.14,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0032",
+      "dialect": "sqlite",
+      "difficulty": "medium",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.14,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0082",
+      "dialect": "postgres",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "missing_index"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.09,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0053",
+      "dialect": "sqlite",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0008",
+      "dialect": "postgres",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.15,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0016",
+      "dialect": "postgres",
+      "difficulty": "medium",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.16,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0049",
+      "dialect": "mysql",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.11,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0054",
+      "dialect": "sqlite",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0043",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.11,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0077",
+      "dialect": "sqlite",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "missing_index"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.09,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0074",
+      "dialect": "mysql",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "missing_index"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.09,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0069",
+      "dialect": "sqlite",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "unnecessary_columns"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.08,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0001",
+      "dialect": "postgres",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0062",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "unnecessary_columns"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.08,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0060",
+      "dialect": "postgres",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "unnecessary_columns"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.08,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0009",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.09,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0056",
+      "dialect": "mysql",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.13,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0007",
+      "dialect": "mysql",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.14,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0070",
+      "dialect": "sqlite",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "unnecessary_columns"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.08,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0027",
+      "dialect": "mysql",
+      "difficulty": "medium",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0034",
+      "dialect": "sqlite",
+      "difficulty": "hard",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.14,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0014",
+      "dialect": "postgres",
+      "difficulty": "medium",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.11,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0040",
+      "dialect": "postgres",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.11,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0054",
+      "dialect": "postgres",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.13,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0006",
+      "dialect": "postgres",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.11,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0085",
+      "dialect": "sqlite",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "inefficient_join"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0090",
+      "dialect": "postgres",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "inefficient_join"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0033",
+      "dialect": "sqlite",
+      "difficulty": "hard",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0044",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0047",
+      "dialect": "mysql",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.11,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0057",
+      "dialect": "sqlite",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.12,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0029",
+      "dialect": "sqlite",
+      "difficulty": "medium",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.14,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0018",
+      "dialect": "sqlite",
+      "difficulty": "hard",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.11,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0037",
+      "dialect": "sqlite",
+      "difficulty": "hard",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.14,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0033",
+      "dialect": "postgres",
+      "difficulty": "hard",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.11,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0066",
+      "dialect": "mysql",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "unnecessary_columns"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.09,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0008",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.17,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0043",
+      "dialect": "mysql",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.12,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0032",
+      "dialect": "postgres",
+      "difficulty": "medium",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.14,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0071",
+      "dialect": "sqlite",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "unnecessary_columns"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.09,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0072",
+      "dialect": "sqlite",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "unnecessary_columns"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.09,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0028",
+      "dialect": "sqlite",
+      "difficulty": "medium",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.13,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0010",
+      "dialect": "mysql",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.11,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0035",
+      "dialect": "postgres",
+      "difficulty": "hard",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.16,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0100",
+      "dialect": "mysql",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "n_plus_one",
+        "unnecessary_columns"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.14,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0076",
+      "dialect": "sqlite",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "missing_index"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.09,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0057",
+      "dialect": "postgres",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.12,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0067",
+      "dialect": "sqlite",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "unnecessary_columns"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.09,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0052",
+      "dialect": "postgres",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.12,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0058",
+      "dialect": "postgres",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "unnecessary_columns"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.13,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0023",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.3,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0049",
+      "dialect": "postgres",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.18,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0011",
+      "dialect": "sqlite",
+      "difficulty": "medium",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.14,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0032",
+      "dialect": "mysql",
+      "difficulty": "medium",
+      "is_benign": true,
+      "is_adversarial": true,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.15,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0089",
+      "dialect": "sqlite",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "inefficient_join"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.11,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0100",
+      "dialect": "sqlite",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "n_plus_one",
+        "unnecessary_columns"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.16,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0067",
+      "dialect": "mysql",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "unnecessary_columns"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.11,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0078",
+      "dialect": "postgres",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "missing_index"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0068",
+      "dialect": "sqlite",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "unnecessary_columns"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.09,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0010",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": true,
+      "is_adversarial": false,
+      "declared_issues": [],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.13,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0086",
+      "dialect": "mysql",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "inefficient_join"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.11,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0052",
+      "dialect": "mysql",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.13,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0039",
+      "dialect": "postgres",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.13,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0092",
+      "dialect": "mysql",
+      "difficulty": "medium",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "n_plus_one"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.2,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-sq-0042",
+      "dialect": "sqlite",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "sql_injection"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "location_accuracy": 1.0,
+        "fix_accuracy": 1.0,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.14,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-my-0089",
+      "dialect": "mysql",
+      "difficulty": "hard",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "inefficient_join"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.14,
+      "error_message": null
+    },
+    {
+      "scenario_id": "v3-pg-0062",
+      "dialect": "postgres",
+      "difficulty": "easy",
+      "is_benign": false,
+      "is_adversarial": false,
+      "declared_issues": [
+        "unnecessary_columns"
+      ],
+      "status": "SUCCESS",
+      "findings": [
+        {
+          "issue": "sql_injection",
+          "severity": "critical",
+          "line": 1,
+          "evidence": "Dynamic user-controlled input concatenated into SQL query.",
+          "recommendation": "Use parameterized queries."
+        }
+      ],
+      "evaluation": {
+        "normalized_score": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "location_accuracy": 0.0,
+        "fix_accuracy": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "duplicates": 0
+      },
+      "execution_time_ms": 0.1,
+      "error_message": null
+    }
+  ]
+}
