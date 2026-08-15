@@ -110,8 +110,8 @@ class SQLReviewEnv:
             return self._result(0.0)
 
         self.steps += 1
-        comment = action.review_comment
-        self.feedback_history.append(comment)
+        effective_comment = action.get_effective_comment()
+        self.feedback_history.append(effective_comment)
         
         # Calculate reward via rubric
         reward_value = self.rubric(action, self.state())
@@ -134,6 +134,6 @@ class SQLReviewEnv:
             "info": {
                 "step": self.steps,
                 "found_issues": list(self.rubric.found_issues),
-                "remaining_issues": self.state().issues_remaining
+                "remaining_issues": self.state().issues_remaining,
             }
         }

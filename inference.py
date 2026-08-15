@@ -1,8 +1,18 @@
+from __future__ import annotations
 import os
 import textwrap
-from typing import List, Optional
-from openai import OpenAI
+from typing import List, Optional, Dict, Any
 import requests
+
+from privacy import PrivacyGateway, SanitizedLogger
+from security import (
+    PromptIsolationManager,
+    ModelProvider,
+    MockModelProvider,
+    get_model_provider,
+    parse_model_findings_json,
+)
+from models import SQLReviewAction, StructuredFinding
 
 # =========================
 # Mandatory Env Variables
@@ -16,73 +26,73 @@ ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://0.0.0.0:7860")  # Local default
 # Configuration
 # =========================
 MAX_STEPS = 10
-TEMPERATURE = 0.2
-MAX_TOKENS = 150
 SUCCESS_THRESHOLD = 0.7
 
-SYSTEM_PROMPT = textwrap.dedent(
-    """
-    You are an expert SQL reviewer. Your task is to analyze the provided SQL query and identify security vulnerabilities (like SQL Injection) or performance issues (like N+1 queries, missing indexes).
-    
-    Format your response as a concise review comment. Mention the issue name clearly if you find one.
-    """
-).strip()
+privacy_gateway = PrivacyGateway()
+prompt_manager = PromptIsolationManager()
+sanitized_logger = SanitizedLogger("inference-logger")
+
 
 # =========================
-# Logging Functions (STRICT)
+# Logging Functions
 # =========================
 def log_start(task: str, env: str, model: str) -> None:
-    print(f"[START] task={task} env={env} model={model}", flush=True)
+    sanitized_logger.info(f"[START] task={task} env={env} model={model}")
+
 
 def log_step(step: int, action: str, reward: float, done: bool, error: Optional[str]) -> None:
     error_val = error if error else "null"
     done_val = str(done).lower()
-    print(
-        f"[STEP] step={step} action={action} reward={reward:.2f} done={done_val} error={error_val}",
-        flush=True,
-    )
+    sanitized_logger.info(f"[STEP] step={step} action={action} reward={reward:.2f} done={done_val} error={error_val}")
+
 
 def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
-    print(f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}", flush=True)
+    sanitized_logger.info(f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}")
+
 
 # =========================
 # Core Logic
 # =========================
-def get_model_review(client: OpenAI, query: str, schema: str, history: List[str]) -> str:
-    history_block = "\n".join(history[-3:]) if history else "None"
-    user_prompt = textwrap.dedent(
-        f"""
-        SQL Query: {query}
-        Table Schema: {schema}
-        
-        Previous Feedback:
-        {history_block}
-        
-        Provide your concise review comment:
-        """
-    ).strip()
-    
-    # Retry logic for robustness during evaluation
-    for attempt in range(3):
-        try:
-            completion = client.chat.completions.create(
-                model=MODEL_NAME,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": user_prompt},
-                ],
-                temperature=TEMPERATURE,
-                max_tokens=MAX_TOKENS,
-            )
-            return (completion.choices[0].message.content or "").strip()
-        except Exception as exc:
-            if attempt == 2:
-                return f"Error calling model after multiple attempts: {exc}"
-            continue
-    return "Error: Unexpected flow in model calling."
+def get_model_review(
+    provider: ModelProvider,
+    query: str,
+    schema: str,
+    history: List[str]
+) -> Tuple[Dict[str, Any], str]:
+    """
+    Sanitizes raw SQL/Schema via PrivacyGateway, builds isolated prompts,
+    executes provider generation, and returns (action_payload, raw_response).
+    """
+    # 1. Privacy Gateway Sanitization Boundary
+    sanitized_ctx = privacy_gateway.sanitize_context(query, schema)
 
-def run_task(task_id: str, client: OpenAI):
+    # 2. Prompt Isolation Boundary
+    sys_prompt, user_prompt, _ = prompt_manager.build_isolated_prompt(
+        sanitized_query=sanitized_ctx.query,
+        sanitized_schema=sanitized_ctx.schema_context,
+        feedback_history=history,
+    )
+
+    # 3. Provider Generation
+    response_text = provider.generate(sys_prompt, user_prompt)
+
+    # 4. Parse & Validate Structured Output
+    findings, parse_err = parse_model_findings_json(response_text)
+
+    if findings:
+        action = SQLReviewAction(
+            review_comment=f"AI Agent identified {len(findings)} structured issues.",
+            findings=findings,
+        )
+        return action.model_dump(), response_text
+    
+    # Fallback to free-text review comment
+    action = SQLReviewAction(review_comment=response_text if response_text.strip() else "No issues identified.")
+    return action.model_dump(), response_text
+
+
+def run_task(task_id: str, provider: ModelProvider):
     rewards = []
     steps_taken = 0
     success = False
@@ -91,7 +101,6 @@ def run_task(task_id: str, client: OpenAI):
     log_start(task=task_id, env="sql-review-env", model=MODEL_NAME)
     
     try:
-        # Reset relative to the environment URL
         res = requests.post(f"{ENV_BASE_URL}/reset", params={"task": task_id})
         obs = res.json()
         
@@ -102,11 +111,9 @@ def run_task(task_id: str, client: OpenAI):
             query = obs["query"]
             schema = obs.get("schema_context", "N/A")
             
-            review_comment = get_model_review(client, query, schema, history)
-            action = {"review_comment": review_comment}
+            action_payload, raw_resp = get_model_review(provider, query, schema, history)
             
-            # Step
-            step_res = requests.post(f"{ENV_BASE_URL}/step", json=action)
+            step_res = requests.post(f"{ENV_BASE_URL}/step", json=action_payload)
             data = step_res.json()
             
             obs = data["observation"]
@@ -115,16 +122,14 @@ def run_task(task_id: str, client: OpenAI):
             
             rewards.append(reward)
             steps_taken = step
-            log_step(step, review_comment.replace("\n", " "), reward, done, None)
+            log_step(step, raw_resp.replace("\n", " "), reward, done, None)
             
-            history.append(f"Step {step}: {review_comment}")
+            history.append(f"Step {step}: {raw_resp}")
             
             if done:
                 break
 
-        # Calculate final score (normalized strictly between 0 and 1)
         total_reward = sum(rewards)
-        # Dynamic max based on task
         if "easy" in task_id or "medium" in task_id:
             max_possible = 0.5
         elif "hard" in task_id:
@@ -135,19 +140,19 @@ def run_task(task_id: str, client: OpenAI):
             max_possible = 0.5 
             
         unclamped_score = (total_reward / max_possible) if max_possible > 0 else 0.0
-        # Phase 2 requirement: score must be strictly between 0 and 1
         score = max(0.01, min(0.99, unclamped_score))
         success = score >= SUCCESS_THRESHOLD
         
     except Exception as e:
         log_end(False, steps_taken, 0.0, rewards)
-        print(f"[DEBUG] Fatal error in task {task_id}: {e}")
+        sanitized_logger.error(f"[DEBUG] Fatal error in task {task_id}: {e}")
         return
 
     log_end(success, steps_taken, score, rewards)
 
+
 def main():
-    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
+    provider = get_model_provider()
     tasks = [
         "easy-sql-review",
         "medium-sql-review",
@@ -156,7 +161,8 @@ def main():
         "performance-optimization"
     ]
     for task_id in tasks:
-        run_task(task_id, client)
+        run_task(task_id, provider)
+
 
 if __name__ == "__main__":
     main()
