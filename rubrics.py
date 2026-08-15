@@ -33,7 +33,8 @@ class SQLReviewRubric(Rubric):
         self.expected_issues = expected_issues
 
     def forward(self, action: Any, observation: Any) -> float:
-        comment = action.review_comment.lower()
+        comment = getattr(action, "get_effective_comment", lambda: getattr(action, "review_comment", ""))()
+        comment = (comment or "").lower()
         new_findings = []
         
         for issue_id in self.expected_issues:
@@ -45,19 +46,28 @@ class SQLReviewRubric(Rubric):
                 new_findings.append(issue_id)
                 self.found_issues.add(issue_id)
 
-        # Reward calculation
-        # 0.5 for each correct finding
-        # Small penalty for hallucinations? (For now, just reward findings)
         reward = len(new_findings) * 0.5
-        
-        # Check for false positives (optional: penalize if keywords don't match expected)
-        # But for robustness, let's keep it simple for Round 1
-        
         return round(reward, 2)
 
     def reset(self):
         self.found_issues = set()
         self.expected_issues = []
+
+
+class V2EvidenceRubric(Rubric):
+    """V2 Evidence-Based Rubric evaluating structured findings against ground truth."""
+    
+    def __init__(self):
+        from grading.evaluator import EvidenceBasedEvaluator
+        self.evaluator = EvidenceBasedEvaluator()
+        self.ground_truth = []
+
+    def set_ground_truth(self, ground_truth: List[Any]):
+        self.ground_truth = ground_truth
+
+    def forward(self, action: Any, observation: Any) -> float:
+        res = self.evaluator.evaluate(action, self.ground_truth)
+        return res.normalized_score
 
 class OutcomeRubric(Rubric):
     """Calculates final score (0.0 to 1.0) based on total findings."""
