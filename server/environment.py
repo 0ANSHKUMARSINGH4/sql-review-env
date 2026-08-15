@@ -41,25 +41,53 @@ class SQLReviewEnv:
             }
         }
         self.current_task_id = "easy-sql-review"
-        self.feedback_history = []
-        self.steps = 0
-        self.max_steps = 10
         self.done = False
         self.rubric = SQLReviewRubric()
+        from scenarios.generator import ScenarioGenerator
+        self.generator = ScenarioGenerator()
 
-    def reset(self, task: str = "easy-sql-review") -> SQLReviewObservation:
-        """Reset the environment to a specific task."""
-        if task not in self.scenarios:
-            task = "easy-sql-review"
+    def reset(
+        self,
+        task: str = "easy-sql-review",
+        seed: Optional[int] = None,
+        dialect: str = "postgres",
+        difficulty: str = "medium",
+    ) -> SQLReviewObservation:
+        """Reset the environment to a specific task or generate a dynamic scenario."""
+        if task.startswith("generated") or seed is not None:
+            actual_seed = seed if seed is not None else 12345
+            if ":" in task:
+                try:
+                    actual_seed = int(task.split(":")[1])
+                except ValueError:
+                    pass
             
-        self.current_task_id = task
+            gen_scenario = self.generator.generate(
+                seed=actual_seed,
+                dialect=dialect,
+                difficulty=difficulty,
+            )
+            task_id = gen_scenario.scenario_id
+            self.scenarios[task_id] = {
+                "query": gen_scenario.query,
+                "schema": gen_scenario.schema,
+                "issues": [gt.issue for gt in gen_scenario.target_issues],
+                "difficulty": gen_scenario.difficulty,
+                "dialect": gen_scenario.dialect,
+            }
+            self.current_task_id = task_id
+        elif task in self.scenarios:
+            self.current_task_id = task
+        else:
+            self.current_task_id = "easy-sql-review"
+            
         self.feedback_history = []
         self.steps = 0
         self.done = False
         
         # Initialize rubric with expected issues
         self.rubric.reset()
-        self.rubric.set_expected(self.scenarios[task]["issues"])
+        self.rubric.set_expected(self.scenarios[self.current_task_id]["issues"])
         
         return self.state()
 

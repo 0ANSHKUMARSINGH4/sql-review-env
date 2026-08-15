@@ -91,3 +91,18 @@ docker run -p 7860:7860 sql-review-env
 | Hard | 0.85  |
 
 *Scores obtained using Mistral-7B-Instruct-v0.3.*
+
+---
+
+## Dynamic Scenario Generation (V2)
+
+In addition to the 5 baseline tasks, V2 supports **deterministic dynamic scenario generation** across multiple SQL dialects (`postgres`, `mysql`, `sqlite`) and difficulties (`easy`, `medium`, `hard`):
+
+```python
+from scenarios import ScenarioGenerator
+
+generator = ScenarioGenerator()
+scenario = generator.generate(seed=12345, dialect="postgres", difficulty="hard")
+```
+
+Dynamic scenarios are reproducible from seeds and verified via SQL AST parsing (`sqlglot`). Reset the environment with dynamic seeds via `/reset?task=generated&seed=12345&dialect=postgres&difficulty=hard`.
