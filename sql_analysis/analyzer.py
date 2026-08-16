@@ -9,7 +9,7 @@ from sql_analysis.ast_parser import SQLASTParser, ParseResult
 
 class GroundTruthIssue(BaseModel):
     """Structured internal ground-truth issue representation."""
-    issue: str = Field(description="Issue type: sql_injection, n_plus_one, missing_index, inefficient_join, unnecessary_columns.")
+    issue: str = Field(description="Issue type: sql_injection, n_plus_one, missing_index, inefficient_join, unnecessary_columns, destructive_operation.")
     severity: str = Field(description="Severity: critical, high, medium, low, info.")
     line: Optional[int] = Field(default=None, description="1-indexed line number where issue occurs.")
     evidence: str = Field(description="Deterministic explanation of why this issue was identified.")
@@ -59,47 +59,120 @@ class SQLAnalyzer:
             return heuristic_issues, parse_result
 
         # AST Structural Analysis
-        expr = parse_result.expression
+        expr_list = parse_result.expressions or ([parse_result.expression] if parse_result.expression else [])
         lines = sql.splitlines()
 
-        # 1. SELECT * / Unnecessary Columns Analysis (CONFIRMED)
-        for select_expr in expr.find_all(exp.Select):
-            for projection in select_expr.expressions:
-                if isinstance(projection, exp.Star) or projection.find(exp.Star):
-                    line_no = self._find_line_number(lines, "select", "*")
+        for expr in expr_list:
+            # 1. Destructive SQL Operations Analysis (CONFIRMED)
+            # a) DROP operations
+            drops = list(expr.find_all(exp.Drop))
+            alters = list(expr.find_all(exp.Alter))
+            if (isinstance(expr, exp.Drop) or drops) and not alters:
+                line_no = self._find_line_number(lines, "drop")
+                issues.append(
+                    GroundTruthIssue(
+                        issue="destructive_operation",
+                        severity="critical",
+                        line=line_no,
+                        evidence="Detected destructive DROP operation removing a database table, index, or schema object.",
+                        recommendation="Verify if DROP operation is intended. For operational workflows, avoid destructive object removal without migration rollback safeguards.",
+                        status="confirmed",
+                        confidence=1.0,
+                    )
+                )
+
+            # b) TRUNCATE operations
+            truncates = list(expr.find_all(exp.TruncateTable))
+            if isinstance(expr, exp.TruncateTable) or truncates or (isinstance(expr, exp.Command) and "TRUNCATE" in str(expr).upper()):
+                line_no = self._find_line_number(lines, "truncate")
+                issues.append(
+                    GroundTruthIssue(
+                        issue="destructive_operation",
+                        severity="critical",
+                        line=line_no,
+                        evidence="Detected destructive TRUNCATE statement which removes all table records without transaction rollback.",
+                        recommendation="Use targeted DELETE with a WHERE clause or verify if bulk table purge is explicitly intended.",
+                        status="confirmed",
+                        confidence=1.0,
+                    )
+                )
+
+            # c) Destructive ALTER operations (e.g. DROP COLUMN, DROP CONSTRAINT)
+            if isinstance(expr, exp.Alter) or alters:
+                alter_nodes = [expr] if isinstance(expr, exp.Alter) else alters
+                for alter_node in alter_nodes:
+                    alter_drops = list(alter_node.find_all(exp.Drop))
+                    if alter_drops or "DROP" in str(alter_node).upper():
+                        line_no = self._find_line_number(lines, "alter", "drop")
+                        issues.append(
+                            GroundTruthIssue(
+                                issue="destructive_operation",
+                                severity="high",
+                                line=line_no,
+                                evidence="Detected destructive ALTER operation dropping a column or constraint.",
+                                recommendation="Ensure column deprecation and data migration steps are completed prior to executing destructive ALTER statements.",
+                                status="confirmed",
+                                confidence=0.95,
+                            )
+                        )
+                        break
+
+            # d) Unbounded DELETE operations (DELETE without WHERE clause)
+            deletes = [expr] if isinstance(expr, exp.Delete) else list(expr.find_all(exp.Delete))
+            for del_node in deletes:
+                if isinstance(del_node, exp.Delete) and not del_node.find(exp.Where):
+                    line_no = self._find_line_number(lines, "delete")
                     issues.append(
                         GroundTruthIssue(
-                            issue="unnecessary_columns",
-                            severity="low",
+                            issue="destructive_operation",
+                            severity="critical",
                             line=line_no,
-                            evidence="Detected 'SELECT *' wildcard projection in query.",
-                            recommendation="Explicitly list required columns instead of fetching all columns with '*'.",
+                            evidence="Detected unbounded DELETE statement without a WHERE clause predicate, affecting all table records.",
+                            recommendation="Add an explicit WHERE clause to restrict DELETE operations to target rows.",
                             status="confirmed",
                             confidence=1.0,
                         )
                     )
-                    break  # Avoid duplicate finding per select clause
+                    break
 
-        # 2. Inefficient JOIN Analysis (CONFIRMED for CROSS JOIN, CANDIDATE for Cartesian product)
-        for join_expr in expr.find_all(exp.Join):
-            join_kind = str(join_expr.args.get("kind", "")).upper()
-            join_on = join_expr.args.get("on")
-            
-            if "CROSS" in join_kind or ("CROSS" in str(join_expr).upper() and not join_on):
-                line_no = self._find_line_number(lines, "join", "cross")
-                issues.append(
-                    GroundTruthIssue(
-                        issue="inefficient_join",
-                        severity="medium",
-                        line=line_no,
-                        evidence="Detected explicit 'CROSS JOIN' operation resulting in a Cartesian product.",
-                        recommendation="Use an INNER or LEFT JOIN with explicit join predicates.",
-                        status="confirmed",
-                        confidence=0.95,
+            # 2. SELECT * / Unnecessary Columns Analysis (CONFIRMED)
+            for select_expr in expr.find_all(exp.Select):
+                for projection in select_expr.expressions:
+                    if isinstance(projection, exp.Star) or projection.find(exp.Star):
+                        line_no = self._find_line_number(lines, "select", "*")
+                        issues.append(
+                            GroundTruthIssue(
+                                issue="unnecessary_columns",
+                                severity="low",
+                                line=line_no,
+                                evidence="Detected 'SELECT *' wildcard projection in query.",
+                                recommendation="Explicitly list required columns instead of fetching all columns with '*'.",
+                                status="confirmed",
+                                confidence=1.0,
+                            )
+                        )
+                        break  # Avoid duplicate finding per select clause
+
+            # 3. Inefficient JOIN Analysis (CONFIRMED for CROSS JOIN, CANDIDATE for Cartesian product)
+            for join_expr in expr.find_all(exp.Join):
+                join_kind = str(join_expr.args.get("kind", "")).upper()
+                join_on = join_expr.args.get("on")
+
+                if "CROSS" in join_kind or ("CROSS" in str(join_expr).upper() and not join_on):
+                    line_no = self._find_line_number(lines, "join", "cross")
+                    issues.append(
+                        GroundTruthIssue(
+                            issue="inefficient_join",
+                            severity="medium",
+                            line=line_no,
+                            evidence="Detected explicit 'CROSS JOIN' operation resulting in a Cartesian product.",
+                            recommendation="Use an INNER or LEFT JOIN with explicit join predicates.",
+                            status="confirmed",
+                            confidence=0.95,
+                        )
                     )
-                )
 
-        # 3. SQL Injection Analysis (CONFIRMED for dynamic execution/concat)
+        # 4. SQL Injection Analysis (CONFIRMED for dynamic execution/concat)
         sql_lower = sql.lower()
         if re.search(r"(?i)\bexec(?:ute)?\s*\(", sql) or "'+ " in sql or " + '" in sql or "+\"" in sql or "'\"" in sql or "\"'" in sql:
             line_no = self._find_line_number(lines, "exec", "+", "'\"")
@@ -128,7 +201,7 @@ class SQLAnalyzer:
                 )
             )
 
-        # 4. N+1 Query Analysis (CANDIDATE ONLY for standalone queries with loop trace metadata)
+        # 5. N+1 Query Analysis (CANDIDATE ONLY for standalone queries with loop trace metadata)
         if re.search(r"(?i)(loop|for\s+in\s+|repeatedly|n\+1)", sql) or (schema_context and re.search(r"(?i)n\+1", schema_context)):
             issues.append(
                 GroundTruthIssue(
@@ -142,7 +215,7 @@ class SQLAnalyzer:
                 )
             )
 
-        # 5. Missing Index Analysis (CONFIRMED if schema index info present, CANDIDATE if missing)
+        # 6. Missing Index Analysis (CONFIRMED if schema index info present, CANDIDATE if missing)
         if "where" in sql_lower:
             where_match = re.search(r"(?i)where\s+([a-zA-Z0-9_\.]+)", sql)
             where_col = where_match.group(1) if where_match else "filtered_column"
@@ -207,6 +280,49 @@ class SQLAnalyzer:
                     line=self._find_line_number(lines, "exec", "+"),
                     evidence="Heuristic match: Dynamic string concatenation or EXEC detected.",
                     recommendation="Use parameterized queries.",
+                    status="confirmed",
+                    confidence=0.90,
+                )
+            )
+
+        # Destructive statement fallback check
+        cleaned = re.sub(r"'[^']*'", "''", sql)
+        cleaned = re.sub(r"--[^\n]*", "", cleaned)
+        cleaned = re.sub(r"/\*[\s\S]*?\*/", "", cleaned)
+        cleaned_upper = cleaned.upper()
+
+        if re.search(r"\bDROP\s+(TABLE|VIEW|INDEX|DATABASE|SCHEMA|TRIGGER|FUNCTION|PROCEDURE)\b", cleaned_upper):
+            issues.append(
+                GroundTruthIssue(
+                    issue="destructive_operation",
+                    severity="critical",
+                    line=self._find_line_number(lines, "drop"),
+                    evidence="Heuristic match: Destructive DROP operation detected.",
+                    recommendation="Verify if DROP operation is intended.",
+                    status="confirmed",
+                    confidence=0.90,
+                )
+            )
+        elif re.search(r"\bTRUNCATE\b", cleaned_upper):
+            issues.append(
+                GroundTruthIssue(
+                    issue="destructive_operation",
+                    severity="critical",
+                    line=self._find_line_number(lines, "truncate"),
+                    evidence="Heuristic match: Destructive TRUNCATE operation detected.",
+                    recommendation="Avoid TRUNCATE in operational queries.",
+                    status="confirmed",
+                    confidence=0.90,
+                )
+            )
+        elif re.search(r"\bDELETE\s+FROM\b", cleaned_upper) and not re.search(r"\bWHERE\b", cleaned_upper):
+            issues.append(
+                GroundTruthIssue(
+                    issue="destructive_operation",
+                    severity="critical",
+                    line=self._find_line_number(lines, "delete"),
+                    evidence="Heuristic match: Unbounded DELETE statement without WHERE clause.",
+                    recommendation="Add an explicit WHERE clause.",
                     status="confirmed",
                     confidence=0.90,
                 )

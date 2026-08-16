@@ -82,6 +82,22 @@ def test_v4_api_sql_analyze_malformed(client):
     assert data["parse_error"] is not None
 
 
+def test_v4_api_sql_analyze_destructive_drop_table(client):
+    payload = {
+        "query": "DROP TABLE users;",
+        "dialect": "postgres",
+    }
+    res = client.post("/api/sql/analyze", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["parse_success"] is True
+    assert len(data["findings"]) == 1
+    finding = data["findings"][0]
+    assert finding["issue"] == "destructive_operation"
+    assert finding["severity"] == "critical"
+    assert "DROP" in finding["evidence"].upper()
+
+
 def test_v4_api_sql_explain_allowed(client):
     payload = {
         "query": "SELECT a.id, b.event_name FROM tokens a JOIN events b ON a.id = b.token_id WHERE a.id = 5;",

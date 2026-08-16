@@ -1066,6 +1066,7 @@ def get_platform_ui():
             The static analysis engine parses queries into Abstract Syntax Trees (AST) using multi-dialect SQLGlot parser, identifying vulnerability patterns without requiring a active database connection.
           </p>
           <ul style="font-size:0.85rem; color:var(--text-muted); padding-left:20px; line-height:1.7;">
+            <li>Destructive Operations: DROP, TRUNCATE, ALTER, unbounded DELETE</li>
             <li>SQL Injection: Parameterized query enforcement</li>
             <li>Unnecessary Columns: SELECT * pattern detection</li>
             <li>N+1 Queries: ORM loop trace analysis</li>

@@ -106,3 +106,75 @@ def test_format_numbered_sql():
     assert "1 | SELECT *" in numbered
     assert "2 | FROM users" in numbered
     assert "3 | WHERE id = 1;" in numbered
+
+
+def test_destructive_drop_table_confirmed():
+    analyzer = SQLAnalyzer()
+    for dialect in ["postgres", "mysql", "sqlite"]:
+        sql = "DROP TABLE users;"
+        issues, parse_res = analyzer.analyze(sql, dialect=dialect)
+        assert parse_res.parse_success is True
+        destructive = [i for i in issues if i.issue == "destructive_operation"]
+        assert len(destructive) == 1
+        assert destructive[0].severity == "critical"
+        assert destructive[0].status == "confirmed"
+        assert "DROP" in destructive[0].evidence.upper()
+
+
+def test_destructive_truncate_table_confirmed():
+    analyzer = SQLAnalyzer()
+    for dialect in ["postgres", "mysql", "sqlite"]:
+        sql = "TRUNCATE TABLE users;"
+        issues, parse_res = analyzer.analyze(sql, dialect=dialect)
+        assert parse_res.parse_success is True
+        destructive = [i for i in issues if i.issue == "destructive_operation"]
+        assert len(destructive) == 1
+        assert destructive[0].severity == "critical"
+        assert destructive[0].status == "confirmed"
+        assert "TRUNCATE" in destructive[0].evidence.upper()
+
+
+def test_destructive_alter_confirmed():
+    analyzer = SQLAnalyzer()
+    for dialect in ["postgres", "mysql", "sqlite"]:
+        sql = "ALTER TABLE users DROP COLUMN email;"
+        issues, parse_res = analyzer.analyze(sql, dialect=dialect)
+        assert parse_res.parse_success is True
+        destructive = [i for i in issues if i.issue == "destructive_operation"]
+        assert len(destructive) == 1
+        assert destructive[0].severity == "high"
+        assert destructive[0].status == "confirmed"
+        assert "ALTER" in destructive[0].evidence.upper() or "DROP" in destructive[0].evidence.upper()
+
+
+def test_destructive_unbounded_delete_confirmed():
+    analyzer = SQLAnalyzer()
+    for dialect in ["postgres", "mysql", "sqlite"]:
+        sql = "DELETE FROM users;"
+        issues, parse_res = analyzer.analyze(sql, dialect=dialect)
+        assert parse_res.parse_success is True
+        destructive = [i for i in issues if i.issue == "destructive_operation"]
+        assert len(destructive) == 1
+        assert destructive[0].severity == "critical"
+        assert destructive[0].status == "confirmed"
+        assert "DELETE" in destructive[0].evidence.upper()
+
+
+def test_delete_with_where_does_not_trigger_destructive():
+    analyzer = SQLAnalyzer()
+    for dialect in ["postgres", "mysql", "sqlite"]:
+        sql = "DELETE FROM users WHERE id = 10;"
+        issues, parse_res = analyzer.analyze(sql, dialect=dialect)
+        assert parse_res.parse_success is True
+        destructive = [i for i in issues if i.issue == "destructive_operation"]
+        assert len(destructive) == 0
+
+
+def test_string_literal_does_not_trigger_destructive():
+    analyzer = SQLAnalyzer()
+    for dialect in ["postgres", "mysql", "sqlite"]:
+        sql = "SELECT 'DROP TABLE users' AS query_text FROM audit_log;"
+        issues, parse_res = analyzer.analyze(sql, dialect=dialect)
+        assert parse_res.parse_success is True
+        destructive = [i for i in issues if i.issue == "destructive_operation"]
+        assert len(destructive) == 0

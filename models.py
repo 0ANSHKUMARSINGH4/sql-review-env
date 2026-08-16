@@ -9,6 +9,7 @@ ALLOWED_ISSUES = {
     "missing_index",
     "inefficient_join",
     "unnecessary_columns",
+    "destructive_operation",
 }
 
 ALLOWED_SEVERITIES = {
