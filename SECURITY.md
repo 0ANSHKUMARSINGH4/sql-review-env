@@ -1,7 +1,7 @@
-# Security & Threat Model Policy — SQL Review Environment V2
+# Security & Threat Model Policy — SQL Review Environment
 
 ## Overview
-`sql-review-env` V2 is an enterprise-oriented, privacy-preserving AI SQL review and agent evaluation environment. It provides structured safeguards for evaluating LLM code review agents on SQL security and performance tasks.
+`sql-review-env` is an open, privacy-preserving AI SQL review and evaluation environment. It provides structured safeguards for evaluating code review models and agents on SQL security and performance tasks.
 
 ---
 

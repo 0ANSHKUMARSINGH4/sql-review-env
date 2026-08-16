@@ -4,6 +4,26 @@ All notable changes to the `sql-review-env` project are documented in this file.
 
 ---
 
+## [1.0.0] - 2026-08-16 (Portfolio Release)
+
+### Interactive Web Platform & Public Deployment
+- Deployed public FastAPI web platform on Render (`https://sql-review-env.onrender.com`).
+- Interactive SQL Review screen with real-time AST parsing, line numbering, and severity badges.
+- In-memory SQLite Query Plan Sandbox with policy enforcement (`EXPLAIN QUERY PLAN`).
+- Benchmark Explorer supporting filtering across 300 scenarios, 3 dialects, and 5 issue categories.
+- Truthful Benchmark Dashboard displaying deterministic `MockModelProvider` infrastructure baseline.
+- Run Comparison viewer and interactive Architecture & Threat Model Documentation.
+
+### Benchmark & Evidence Integrity
+- Frozen 300-scenario independent benchmark dataset with canonical SHA-256 validation (`5342c666ce1e774b443ccd6446adecc9d2135d008237681027d393269b295dde`).
+- Multi-dialect support: 100 PostgreSQL, 100 MySQL, 100 SQLite scenarios across Easy, Medium, and Hard difficulty levels.
+- Strict distinction between confirmed AST facts and candidate inferences.
+- Fail-closed external model provider behavior preserving benchmark truthfulness.
+- Destructive SQL operation detection (`DROP`, `TRUNCATE`, destructive `ALTER`, unbounded `DELETE`).
+- Comprehensive 138-test automated regression suite passing 100%.
+
+---
+
 ## [V2.0.0] - 2026-08-15 (Enterprise Upgrade)
 
 ### Phase 1 — Privacy Foundation
